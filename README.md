@@ -5,8 +5,9 @@
 Landscape is a library both engines, 3DEngine and BevyCSharp, take as a git submodule, for a
 heightfield whose recipe is an ordered list of stamps and procedural operations applied again on
 each change, erosion among them, with vegetation placed through Vegetation by slope, height and a
-density map, and a splat map over a few materials. It references no engine, and each engine
-implements the interfaces it declares where it binds the module.
+density map, and a splat map over a few materials. It references no engine, and an engine whose
+recipes stamp pictures implements the one interface it declares, `ILandscapePictures`, where it
+binds the module.
 
 ## What it holds
 
@@ -18,6 +19,7 @@ implements the interfaces it declares where it binds the module.
 | `Noise`, `Terrace`, `Smoothing`, `ThermalErosion`, `HydraulicErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur, ground slumping to its talus, and droplets from a seed cutting channels and filling the feet of slopes |
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
 | `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
+| `PictureStamp` | A picture's heights pressed in over a rectangle, a share of its height a texel, drawn toward by a blend and faded in over an edge, the picture a `HeightPicture` the engine reads through `ILandscapePictures` |
 | `Placement`, `PlacementRule`, `DensityMap` | The places a planting gives, as a place and a seed each, kept by a rule's ranges of height and steepness and a density map, painted or taken from a splat material, and lifted onto the ground as `Planted` with the ground's normal |
 | `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field and indices |
 
@@ -30,7 +32,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture>
 ```
 
 ## Taking it into an engine
@@ -56,10 +58,13 @@ this repository does not have.
 
 ## Binding it in your engine
 
-The module needs nothing of an engine. It declares no interface and calls no renderer, window,
-scheduler or file system, and what it gives out is arrays of .NET's own types and
-`System.Numerics`' vectors, which an engine turns into its own meshes, textures and bodies. The two
-engines above bind it this way, and any other engine on .NET 10 binds it the same.
+The module needs nothing of an engine but the pictures a `PictureStamp` names. It declares one
+interface, `ILandscapePictures`, through which the engine gives a picture's heights by its name as
+a `HeightPicture`, read from its own files, and it calls no renderer, window, scheduler or file
+system. What it gives out is arrays of .NET's own types and `System.Numerics`' vectors, which an
+engine turns into its own meshes, textures and bodies. The two engines above bind it this way, and
+any other engine on .NET 10 binds it the same. A recipe with no picture stamp needs no interface at
+all, as the smallest binding below shows.
 
 ### Conventions
 
@@ -71,6 +76,8 @@ engines above bind it this way, and any other engine on .NET 10 binds it the sam
 | Heights | A row at a time, each row along X and the rows along Z, the order a physics heightfield takes |
 | Texture coordinates | U along X and V along Z, from nothing at the field's first point to one at its last |
 | Splat layers | RGBA bytes, a texel a point, four materials' weights a layer, linear values and not sRGB color |
+| Pictures | A row at a time from the stamp's least Z, each along X, the order an image file is read from its top, its gray a share of the stamp's height |
+| Recipes | JSON on a `Stream`, by `Recipe.Write` and `Recipe.Read`, format 1, each step by its kind and each number as the shortest text that reads back to the same float |
 | Light and color | None, the module holds no light, no color and no exposure |
 | Threads | A build runs on the thread that calls it, stops on its cancellation token, and one builder serves one thread at a time |
 

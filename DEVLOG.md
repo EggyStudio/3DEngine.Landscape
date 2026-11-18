@@ -37,6 +37,11 @@ Trees kept from a place every 1.5 m on the splat ground by a rule of grass from 
 than 0.4 and the grass's weight as their density, each a dark point, standing on the plateau, the
 dome's grass and the crater's rim and on no rock, sand or snow.
 
+![](.github/assets/readings/2026-11-18-item-3-picture.webp)
+A picture of a ridge with a valley across it, 64 by 32 texels given through ILandscapePictures,
+stamped over 80 by 40 m at 18 m by the higher over noise and over 40 by 20 m at 6 m added to a dome,
+each faded in over its edge, oblique, from above and in contours.
+
 ## 2026-10-31
 
 Done that day

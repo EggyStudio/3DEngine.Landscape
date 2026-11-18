@@ -25,7 +25,7 @@ public sealed record Smoothing : LandscapeStep
         init => field = value is >= 1 and <= 256 ? value : throw new ArgumentOutOfRangeException(nameof(Passes), value, "Smoothing takes from one to 256 passes.");
     }
 
-    internal override void Apply(Heightfield field)
+    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
     {
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var across = new float[heights.Length];

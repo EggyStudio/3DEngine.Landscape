@@ -124,7 +124,7 @@ public sealed record HydraulicErosion : LandscapeStep
     /// </remarks>
     public float Scale { get; init => field = value > 0f && float.IsFinite(value) ? value : throw Out(nameof(Scale), value, "a finite number of meters above nothing"); }
 
-    internal override void Apply(Heightfield field)
+    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
     {
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var unit = 1f / Scale;

@@ -38,6 +38,15 @@ var recipes = new Dictionary<string, Recipe>
     // The tests' ground of three stamps, noise and a steep cone (Landscape.Tests/SplatTests.cs),
     // drawn in the colors of the splat map's four materials.
     ["placement"] = Splat(),
+    // A drawn picture of a ridge with a valley across it, 64 by 32 texels, stamped over 80 by 40 m
+    // on noise and faded in over 8 m, and the same added over a dome.
+    ["picture"] = new(129, 129, 1f,
+    [
+        new Noise(3, 40f, 5, 2f),
+        new Stamp(StampShape.Dome, new(20f, 30f), 35f, 12f),
+        new PictureStamp("ridge", new(0f, -20f), new(80f, 40f), 18f, StampBlend.Max, 8f),
+        new PictureStamp("ridge", new(20f, 30f), new(40f, 20f), 6f, StampBlend.Add, 4f),
+    ]),
     ["splat"] = Splat(),
 };
 
@@ -59,7 +68,7 @@ if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 }
 
 Directory.CreateDirectory(args[0]);
-var field = recipe.Build();
+var field = recipe.Build(new DrawnPictures());
 var tiles = LandscapeGeometry.Tiles(field);
 var splat = args[1] is "splat" or "placement" ? SplatMap.Of(field, rules) : null;
 
@@ -281,4 +290,27 @@ static uint Crc(byte[] bytes)
     }
 
     return ~crc;
+}
+
+// The picture recipe's one picture, a ridge along X with a valley cut across it, drawn as a
+// function of the texel, which an engine would read from a file.
+sealed class DrawnPictures : ILandscapePictures
+{
+    public HeightPicture? Heights(string name)
+    {
+        if (name != "ridge") return null;
+        var shares = new float[64 * 32];
+        for (var z = 0; z < 32; z++)
+        {
+            for (var x = 0; x < 64; x++)
+            {
+                var across = (z - 15.5f) / 15.5f;
+                var ridge = MathF.Max(0f, 1f - across * across * 1.6f);
+                var valley = MathF.Min(1f, MathF.Abs(x - 40f) / 6f);
+                shares[z * 64 + x] = ridge * (0.35f + 0.65f * valley);
+            }
+        }
+
+        return new HeightPicture(64, 32, shares);
+    }
 }

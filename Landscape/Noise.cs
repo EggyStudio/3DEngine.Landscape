@@ -83,7 +83,7 @@ public sealed record Noise : LandscapeStep
     /// <param name="place">The place across the ground, X in X and Z in Y, in meters.</param>
     public float At(System.Numerics.Vector2 place) => Sampler().At(place.X, place.Y);
 
-    internal override void Apply(Heightfield field)
+    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
     {
         var sampler = Sampler();
         for (var row = 0; row < field.Rows; row++)

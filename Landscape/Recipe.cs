@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Landscape;
 
 /// <summary>
@@ -46,16 +48,82 @@ public sealed record Recipe
     /// <summary>Builds the field from flat ground by the steps in their order.</summary>
     /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
     /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
-    public Heightfield Build(CancellationToken cancel = default)
+    /// <exception cref="InvalidOperationException">
+    /// A step stamps a picture, which a build with no pictures has none of.
+    /// </exception>
+    public Heightfield Build(CancellationToken cancel = default) => Build(null, cancel);
+
+    /// <summary>
+    /// Builds the field from flat ground, its picture stamps read through the engine's pictures.
+    /// </summary>
+    /// <param name="pictures">
+    /// The engine's answer for the pictures the recipe's stamps name.
+    /// </param>
+    /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
+    /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// A step stamps a picture the engine holds none of.
+    /// </exception>
+    public Heightfield Build(ILandscapePictures? pictures, CancellationToken cancel = default)
     {
         var field = new Heightfield(Columns, Rows, Spacing);
         foreach (var step in Steps)
         {
             cancel.ThrowIfCancellationRequested();
-            step.Apply(field);
+            step.Apply(field, pictures);
         }
 
         return field;
+    }
+
+    /// <summary>
+    /// The format a recipe is written in, which <see cref="Read"/> takes and no other.
+    /// </summary>
+    public const int Format = 1;
+
+    /// <summary>
+    /// Writes the recipe as JSON, its format, its size and its steps each by its kind.
+    /// </summary>
+    /// <param name="stream">Where the JSON goes, left open.</param>
+    /// <remarks>
+    /// Each number is written as the shortest text that reads back to the same float, so a recipe
+    /// read back builds the same heights to the bit as the one written.
+    /// </remarks>
+    public void Write(Stream stream)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+        JsonSerializer.Serialize(stream, new RecipeFile(Format, Columns, Rows, Spacing, Steps), RecipeJson.Default.RecipeFile);
+    }
+
+    /// <summary>Reads a recipe <see cref="Write"/> wrote.</summary>
+    /// <param name="stream">Where the JSON comes from.</param>
+    /// <exception cref="JsonException">
+    /// The JSON is not a recipe of this format, names a step the module has not, holds a property
+    /// no step has, or gives a number a step refuses, which the exception's inner one names.
+    /// </exception>
+    public static Recipe Read(Stream stream)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+        RecipeFile file;
+        try
+        {
+            file = JsonSerializer.Deserialize(stream, RecipeJson.Default.RecipeFile)
+                ?? throw new JsonException("The JSON holds null where a recipe belongs.");
+        }
+        catch (ArgumentException refused)
+        {
+            throw new JsonException($"The recipe gives a number a step refuses. {refused.Message}", refused);
+        }
+
+        if (file.Format != Format) throw new JsonException($"The recipe is of format {file.Format}, and this module reads format {Format}.");
+        try
+        {
+            return new Recipe(file.Columns, file.Rows, file.Spacing, file.Steps ?? []);
+        }
+        catch (ArgumentException refused)
+        {
+            throw new JsonException($"The recipe's size or steps are refused. {refused.Message}", refused);
+        }
     }
 
     /// <summary>

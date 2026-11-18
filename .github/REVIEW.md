@@ -333,3 +333,20 @@ items done. The strict build is clean and the tests pass, 75.
 **Rule:** the README's opening says each engine implements the interfaces the module declares,
 where the module declares none and its binding section says so. The words under the header stand
 as written (STYLE.md), so they wait for the owner's word.
+
+The recipe as JSON and the picture stamps in the commit carrying this line. `Recipe.Write` and
+`Recipe.Read` keep a recipe as JSON on a stream, format 1, each step by its kind in camel case, an
+enumeration by its name and a vector as two numbers, each number the shortest text that reads back
+to the same float, written by the source generator so an engine that trims reads it with no
+reflection. A file of another format, a step the module has not, a property no step has and a
+number a step refuses are each refused as a `JsonException` naming it. `PictureStamp` presses a
+picture's heights in over a rectangle, drawn toward by the stamps' blends and faded in over an edge,
+the picture a `HeightPicture` an engine gives by its name through `ILandscapePictures`, the one
+interface the module declares, which `Recipe.Build` and `LandscapeBuilder` take. The README's
+opening and its binding section say so, the stale fact the review named mended, and the conventions
+give the pictures' rows and the recipe's file. Tools moves to `7d56e0f` and the four facts take its
+revised form, a fault's whole message given to `Assert.True`. Seven tests come with it, 12 cases,
+among them a recipe of every step read back equal and building the same bits with a pinned hash,
+the file of one stamp as written, six refusals by name, and the picture stamp's rectangle, edge,
+missing picture and rebuild. The reading is `2026-11-18-item-3-picture.webp`. The strict build is
+clean and the tests pass, 87 where there were 75.

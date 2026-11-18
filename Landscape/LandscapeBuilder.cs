@@ -24,14 +24,29 @@ public sealed class LandscapeBuilder
     // engine that writes into Field changes nothing a rebuild starts from.
     private readonly List<Heightfield> _after = [];
     private Heightfield _last;
+    private readonly ILandscapePictures? _pictures;
 
     /// <summary>A builder that builds a recipe from flat ground.</summary>
     /// <param name="recipe">The recipe.</param>
     /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
     /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
-    public LandscapeBuilder(Recipe recipe, CancellationToken cancel = default)
+    public LandscapeBuilder(Recipe recipe, CancellationToken cancel = default) : this(recipe, null, cancel)
+    {
+    }
+
+    /// <summary>
+    /// A builder that reads the pictures its recipes' stamps name through the engine's answer.
+    /// </summary>
+    /// <param name="recipe">The recipe.</param>
+    /// <param name="pictures">
+    /// The engine's answer for the pictures the stamps name, kept for every rebuild.
+    /// </param>
+    /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
+    /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
+    public LandscapeBuilder(Recipe recipe, ILandscapePictures? pictures, CancellationToken cancel = default)
     {
         ArgumentNullException.ThrowIfNull(recipe);
+        _pictures = pictures;
         Recipe = new Recipe(recipe.Columns, recipe.Rows, recipe.Spacing, []);
         _last = new Heightfield(recipe.Columns, recipe.Rows, recipe.Spacing);
         Field = _last.Copy();
@@ -71,7 +86,7 @@ public sealed class LandscapeBuilder
         for (var step = first; step < recipe.Steps.Count; step++)
         {
             cancel.ThrowIfCancellationRequested();
-            recipe.Steps[step].Apply(field);
+            recipe.Steps[step].Apply(field, _pictures);
             built.Add(field);
             if (step + 1 < recipe.Steps.Count) field = field.Copy();
         }

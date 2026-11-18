@@ -49,7 +49,7 @@ public sealed record Terrace : LandscapeStep
         return (step + rise) * Height;
     }
 
-    internal override void Apply(Heightfield field)
+    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
     {
         for (var i = 0; i < field.Heights.Length; i++) field.Heights[i] = Of(field.Heights[i]);
     }

@@ -91,7 +91,7 @@ public sealed record Stamp : LandscapeStep
         };
     }
 
-    internal override void Apply(Heightfield field)
+    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
     {
         // The points whose cell can reach the radius, cut to the field's own.
         var reach = Radius / field.Spacing;
