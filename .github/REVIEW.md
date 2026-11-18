@@ -245,3 +245,16 @@ the package `3DEngine.Landscape`, `IsPackable` staying false, and the tests' ass
 were. The test that loads the library loads it by the new name and checks a type of its own is in
 it, the internals are visible to the tests under theirs, and the README names the assembly and the
 namespace. The tests pass, 47.
+
+Item 3's third part in the commit carrying this line. `SplatRule` gives a material's range of
+height and of steepness, each with a blend beyond it by Hermite's smooth step, and `SplatMap.Of`
+weighs up to eight materials at every point, the weights brought to one and the first material
+covering a point no rule reaches, and packs them four a layer as RGBA bytes summing to 255 by the
+largest remainders. Steepness is `Heightfield.Steepness`, a rise over a run, so the map is the
+field's own arithmetic on every system, and the remarks give the half-texel move an engine makes to
+sample a layer with a tile's texture coordinates. Seven tests come with it, the sums at every
+point, a material at nothing beyond its ranges, a steep flank wholly rock and level ground wholly
+grass, the first material where no rule reaches, five materials in two layers, the refusals, and a
+pinned hash of the layer's bytes. The reading is `2026-11-18-item-3-splat.webp`, drawn by
+`build/reading.cs` blending four colors by the weights. The strict build is clean and the tests
+pass, 54 where there were 47.

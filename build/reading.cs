@@ -32,7 +32,28 @@ var recipes = new Dictionary<string, Recipe>
     // Noise with a steep cone over it, before and after thermal erosion at 31 degrees.
     ["erosion-before"] = Erosion(eroded: false),
     ["erosion-after"] = Erosion(eroded: true),
+    // The tests' ground of three stamps, noise and a steep cone (Landscape.Tests/SplatTests.cs),
+    // drawn in the colors of the splat map's four materials.
+    ["splat"] = new(129, 129, 1f,
+    [
+        new Stamp(StampShape.Dome, new(-10f, 5f), 45f, 18f),
+        new Stamp(StampShape.Plateau, new(20f, -15f), 25f, 8f, StampBlend.Replace),
+        new Stamp(StampShape.Crater, new(55f, 50f), 30f, 6f),
+        new Noise(9, 24f, 4, 1.5f),
+        new Stamp(StampShape.Cone, new(-40f, -40f), 15f, 20f),
+    ]),
 };
+
+// The splat recipe's materials as the tests give them, sand, grass, rock and snow, and a color
+// each, linear, which the picture blends by the map's weights.
+SplatRule[] rules =
+[
+    new("sand", highest: 1f, heightBlend: 1f, mostSteep: 0.5f, steepBlend: 0.2f),
+    new("grass", lowest: 1f, highest: 12f, heightBlend: 1f, mostSteep: 0.5f, steepBlend: 0.2f),
+    new("rock", leastSteep: 0.7f, steepBlend: 0.2f),
+    new("snow", lowest: 14f, heightBlend: 2f, mostSteep: 0.7f, steepBlend: 0.2f),
+];
+Vector3[] colors = [new(0.75f, 0.62f, 0.38f), new(0.18f, 0.36f, 0.10f), new(0.30f, 0.28f, 0.27f), new(0.92f, 0.93f, 0.95f)];
 
 if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 {
@@ -43,11 +64,24 @@ if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 Directory.CreateDirectory(args[0]);
 var field = recipe.Build();
 var tiles = LandscapeGeometry.Tiles(field);
+var splat = args[1] == "splat" ? SplatMap.Of(field, rules) : null;
+
+// A corner's color, the splat map's materials blended by their weights at its point, or a dry
+// ground's where the recipe has no splat map.
+Vector3 Tint(Vector3 corner)
+{
+    if (splat is null) return new Vector3(0.62f, 0.55f, 0.42f);
+    var column = (int)MathF.Round(corner.X / field.Spacing + (field.Columns - 1) * 0.5f);
+    var row = (int)MathF.Round(corner.Z / field.Spacing + (field.Rows - 1) * 0.5f);
+    var color = Vector3.Zero;
+    for (var m = 0; m < colors.Length; m++) color += splat.Weight(m, column, row) * colors[m];
+    return color;
+}
 var sun = Vector3.Normalize(new Vector3(-0.6f, 0.55f, -0.6f));
 foreach (var (view, yaw, pitch, wide) in new[] { ("oblique", 45f, 35f, 720), ("above", 0f, 90f, 440) })
 {
     var path = Path.Combine(args[0], $"{args[1]}-{view}.png");
-    WritePng(path, Draw(tiles, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide));
+    WritePng(path, Draw(tiles, Tint, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide));
     Console.WriteLine(path);
 }
 
@@ -100,7 +134,7 @@ static (int Width, int Height, byte[] Rgb) Contours(Heightfield field, int width
 
 // The tiles' triangles drawn by a depth buffer in an orthographic view turned about up by the yaw
 // and tipped down by the pitch, each pixel lit by its corners' normals, on white.
-static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> tiles, float yaw, float pitch, Vector3 sun, int width)
+static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> tiles, Func<Vector3, Vector3> tint, float yaw, float pitch, Vector3 sun, int width)
 {
     var turn = Matrix4x4.CreateRotationY(yaw) * Matrix4x4.CreateRotationX(pitch);
     var corners = tiles.Select(tile => tile.Positions.Select(p => Vector3.Transform(p, turn)).ToArray()).ToArray();
@@ -114,13 +148,12 @@ static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> til
     Array.Fill(depth, float.NegativeInfinity);
     var rgb = new byte[width * height * 3];
     Array.Fill(rgb, (byte)255);
-    // A dry ground's color, so the white ground around the field stays apart from its lit faces.
-    var ground = new Vector3(0.62f, 0.55f, 0.42f);
 
     for (var t = 0; t < tiles.Count; t++)
     {
         var (tile, turned) = (tiles[t], corners[t]);
         var screen = turned.Select(p => new Vector3(margin + (p.X - left) * scale, margin + (top - p.Y) * scale, p.Z)).ToArray();
+        var tints = tile.Positions.Select(tint).ToArray();
         for (var i = 0; i < tile.Indices.Length; i += 3)
         {
             var (a, b, c) = (tile.Indices[i], tile.Indices[i + 1], tile.Indices[i + 2]);
@@ -142,6 +175,7 @@ static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> til
                     if (z <= depth[y * width + x]) continue;
                     depth[y * width + x] = z;
                     var normal = Vector3.Normalize(wa * tile.Normals[a] + wb * tile.Normals[b] + wc * tile.Normals[c]);
+                    var ground = wa * tints[a] + wb * tints[b] + wc * tints[c];
                     var lit = ground * (0.3f + 0.7f * MathF.Max(0f, Vector3.Dot(normal, sun)));
                     var at = (y * width + x) * 3;
                     (rgb[at], rgb[at + 1], rgb[at + 2]) = (Byte(lit.X), Byte(lit.Y), Byte(lit.Z));

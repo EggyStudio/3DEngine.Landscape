@@ -129,6 +129,23 @@ public sealed class Heightfield
     /// </param>
     public float Slope(Vector2 place) => MathF.Acos(Math.Clamp(Normal(place).Y, -1f, 1f));
 
+    /// <summary>
+    /// How steep the ground is at a point as a rise over a run, the rise along X and along Z taken
+    /// together, nothing on flat ground and one at 45 degrees.
+    /// </summary>
+    /// <param name="column">The point's column, from zero along X.</param>
+    /// <param name="row">The point's row, from zero along Z.</param>
+    /// <remarks>
+    /// A rise is the field's own arithmetic, a square root of a sum of squares, where an angle is a
+    /// tangent's or an arc cosine's that each C runtime rounds its own way, so what is reckoned
+    /// from it, a splat map among them, is the same on every system.
+    /// </remarks>
+    public float Steepness(int column, int row)
+    {
+        var (x, z) = Rise(column, row);
+        return MathF.Sqrt(x * x + z * z);
+    }
+
     /// <summary>A field of the same size holding the same heights, apart from this one.</summary>
     public Heightfield Copy()
     {

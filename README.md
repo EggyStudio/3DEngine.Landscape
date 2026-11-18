@@ -15,6 +15,7 @@ implements the interfaces it declares where it binds the module.
 | `Stamp` | A shape, `StampShape`, pressed in at a place with a radius and a height and met by a blend, `StampBlend` |
 | `Noise`, `Terrace`, `Smoothing`, `ThermalErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur and ground slumping to its talus |
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
+| `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
 | `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field and indices |
 
 A recipe gives the same heights to the bit on Linux, Windows and macOS, since its steps use only
@@ -26,7 +27,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|splat>
 ```
 
 ## Taking it into an engine

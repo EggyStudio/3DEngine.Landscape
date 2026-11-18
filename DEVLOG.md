@@ -20,6 +20,11 @@ faces stand at the square root of two times the talus, and against the eight abo
 diagonals over the square root of two, which leaves eight faces, oblique, lit from above and in
 contours of a meter.
 
+![](.github/assets/readings/2026-11-18-item-3-splat.webp)
+The splat map's four materials over three stamps, noise and a steep cone, sand below 1 m, grass to
+12 m, rock above a steepness of 0.7 and snow above 14 m, each blending into the next and blended in
+the picture by their weights, oblique, from above and in contours.
+
 ## 2026-10-31
 
 Done that day
