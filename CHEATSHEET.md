@@ -238,6 +238,7 @@ float StepError(Heightfield field, int column, int row, int step, int tileCells 
 record LandscapeMesh                                     // One tile of a field as triangles, in meters with Y up about the field's middle, which an engine builds a mesh of
 LandscapeMesh(int column, int row, Vector3[] positions, Vector3[] normals, Vector2[] uvs, uint[] indices);  // A tile of its column and row among the field's tiles and its corners' arrays
 (Vector3 Low, Vector3 High) Bounds { get; }              // The least and the greatest corner of the box about every corner of the tile, its skirt's among them, which an engine culls the tile by
+ushort[]? ShortIndices { get; }                          // The indices as 16-bit numbers, which an engine draws a tile of up to 65,536 corners with at half the memory, or nothing where the tile has more
 int Column { get; init; }                                // The tile's column among the field's tiles, from zero along X
 int Row { get; init; }                                   // The tile's row among the field's tiles, from zero along Z
 Vector3[] Positions { get; init; }                       // A corner a point of the field the tile covers, a row at a time along X and the rows along Z

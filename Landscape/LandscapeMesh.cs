@@ -56,6 +56,19 @@ public sealed record LandscapeMesh
     /// </summary>
     public (Vector3 Low, Vector3 High) Bounds { get; }
 
+    /// <summary>
+    /// The indices as 16-bit numbers, which an engine draws a tile of up to 65,536 corners with at
+    /// half the memory, or nothing where the tile has more.
+    /// </summary>
+    /// <remarks>
+    /// The short indices are made once for each array of indices and kept beside it, so tiles that
+    /// share their indices share their short ones, which an engine reads and never writes.
+    /// </remarks>
+    public ushort[]? ShortIndices => Positions.Length > 65_536 ? null : Short.GetValue(Indices, static indices => [.. indices.Select(index => (ushort)index)]);
+
+    // The short indices of each array of indices, dropped with the array.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<uint[], ushort[]> Short = new();
+
     /// <summary>The tile's column among the field's tiles, from zero along X.</summary>
     public int Column { get; init; }
 

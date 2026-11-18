@@ -609,3 +609,10 @@ a texel a point, which an engine gives a `Masked` step by a name, so a mask over
 rectangle weighs each point by its own share, a splat material's weights among them, with no picture
 file. One test holds a masked noise over a cone to the grass's share at every point to a
 ten-thousandth. The tests pass, 132.
+
+Short indices in the commit carrying this line, the third hourly step. Its test came first and
+failed for want of the member. `LandscapeMesh.ShortIndices` gives a tile's indices as 16-bit numbers
+where its corners number 65,536 or fewer, and nothing where they number more, made once for each
+array of indices and kept beside it, so tiles sharing their indices share their short ones. One test
+holds them equal to the indices, shared between two tiles, and nothing for a tile of 66,049 corners.
+The tests pass, 133.

@@ -23,7 +23,7 @@ the one interface it declares, `ILandscapePictures`, where it binds the module.
 | `PictureStamp` | A picture's heights pressed in over a rectangle, a share of its height a texel, drawn toward by a blend and faded in over an edge, the picture a `HeightPicture` the engine reads through `ILandscapePictures` |
 | `NormalMap` | The field's normals as RGBA bytes, a texel a point, the way up in the field's axes from minus one at 0 to one at 255, written again over a change, which lights a tile drawn far off at the field's own detail |
 | `Placement`, `PlacementRule`, `DensityMap` | The places a planting gives, as a place and a seed each, kept by a rule's ranges of height and steepness and a density map, painted or taken from a splat material, and lifted onto the ground as `Planted` with the ground's normal |
-| `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field, indices and its bounds, at a step of every point or coarser with a skirt below its edges for a tile drawn far off |
+| `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field, indices with their 16-bit `ShortIndices` and its bounds, at a step of every point or coarser with a skirt below its edges for a tile drawn far off |
 
 A recipe gives the same heights to the bit on Linux, Windows and macOS, since its steps use only
 the arithmetic IEEE 754 rounds alike on every system, and a test holds a recipe's heights to a hash

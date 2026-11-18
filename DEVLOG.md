@@ -233,6 +233,8 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `b78880b` A density map gives itself as a picture of its shares, so a masked step weighs each
+  point by a splat material or a painted density with no picture file.
 - `e053e31` A step can be masked by a picture of weights over a rectangle, so it changes each point
   by its weight and leaves the ground outside as it stood.
 - `e4894ca` The review holds a handoff of what the module holds, what waits on the owner and what to

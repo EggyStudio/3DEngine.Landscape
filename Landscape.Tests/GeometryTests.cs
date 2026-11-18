@@ -97,6 +97,20 @@ public class GeometryTests
     private const double MostBytesAPoint = 34;
 
     [Fact]
+    public void A_Tiles_Short_Indices_Are_Its_Indices_And_Shared_As_They_Are()
+    {
+        var field = new Heightfield(513, 513, 1f);
+        var tiles = LandscapeGeometry.Tiles(field);
+
+        Assert.Equal(tiles[0].Indices.Select(index => (ushort)index), tiles[0].ShortIndices!);
+        Assert.Same(tiles[0].ShortIndices, tiles[^1].ShortIndices);
+
+        // A tile of 256 cells a side has 66,049 corners, past the 65,536 a short index reaches.
+        Assert.Null(LandscapeGeometry.Tile(field, 0, 0, tileCells: 256).ShortIndices);
+        Assert.NotNull(LandscapeGeometry.Tile(field, 0, 0, tileCells: 128).ShortIndices);
+    }
+
+    [Fact]
     public void A_Tile_Refuses_What_The_Field_Does_Not_Have()
     {
         var field = new Heightfield(129, 129, 1f);
