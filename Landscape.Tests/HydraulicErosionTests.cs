@@ -124,6 +124,22 @@ public class HydraulicErosionTests
     }
 
     [Fact]
+    public void Droplets_Start_Near_The_One_Before_So_The_Field_Stays_In_The_Caches()
+    {
+        // A proxy for the time a point, which a test cannot read steadily. A droplet of 30 steps
+        // stays within 30 points of where it starts, so droplets started near each other read
+        // and write the same few rows of the field while they are in the processor's caches.
+        var starts = new HydraulicErosion(3, 4097 * 4097 / 4).Starts(4097, 4097).ToArray();
+        var apart = 0.0;
+        for (var i = 1; i < starts.Length; i++) apart += Vector2.Distance(starts[i], starts[i - 1]);
+        apart /= starts.Length - 1;
+
+        Assert.Equal(4097 * 4097 / 4, starts.Length);
+        Assert.True(apart <= MostApart, $"A droplet starts {apart:F1} points from the one before.");
+        Assert.All(starts, start => Assert.True(start.X >= 0f && start.X < 4096f && start.Y >= 0f && start.Y < 4096f));
+    }
+
+    [Fact]
     public void Level_Ground_Stays_Level()
     {
         var field = new Heightfield(33, 33, 1f);
@@ -156,13 +172,28 @@ public class HydraulicErosionTests
     // A dome of 40 m against 40 m and one of 160 m against 160 m kept 85.55 and 85.56 hundredths of
     // their peaks after 66,000 droplets and held 330 and 266 pits, where against 1 m and 4 m they
     // kept 80.3 and 81.1 and held 749 and 666, so the test asks 84 hundredths and 500 pits at most.
+    // Droplets drawn anywhere over a field of 4,097 points a side started 2,135.7 points from the
+    // one before, and drawn a block of 64 points at a time 35.0, so a bound of 64 holds them
+    // within a block.
+    private const double MostApart = 64;
+
+    // A dome of 40 m against 40 m and one of 160 m against 160 m kept 86.91 and 86.92 hundredths
+    // of their peaks after 66,000 droplets and held 335 and 298 pits, where against 1 m and 4 m
+    // they kept 80.8 and 81.7 and held 725 and 670, so the test asks 84 hundredths and 500 pits at
+    // most.
     private const float PeakKept = 0.84f;
     private const int MostPits = 500;
+
+    // On Linux, 20,000 droplets wore the cone's flank from 34,529 cubic meters to 27,684 and filled
+    // its foot from 1,552 to 7,460, so a sixth of either is asked. The closed bowl's 39,313.0203
+    // cubic meters were 39,313.0197 after 5,000 droplets, the float sums of their moves rounding
+    // apart by 0.0007. The ramp was dug no point below its edge's lowest, where it was 16.4 m with
+    // the edge worn and never filled. Each tolerance is some twice what was read.
     private const float BelowEdge = 0.02f;
     private const double Worn = 1_000;
     private const double VolumeTolerance = 0.002;
 
     // The hash of the cone's heights after 20,000 droplets, read on Linux at the commit that wrote
     // these tests and held on Windows and macOS by the build workflow.
-    private const ulong PinnedDroplets = 9667194681003907309ul;
+    private const ulong PinnedDroplets = 17289324050643138123ul;
 }

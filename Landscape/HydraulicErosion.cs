@@ -23,7 +23,8 @@ namespace Landscape;
 /// left over it and filled by none was dug without end, deeper with each droplet its slope drew. A
 /// droplet that ends inside the field lays down what it carries there, so the ground's volume is
 /// kept apart from what droplets carry off the edge. The droplets run one after another in a fixed
-/// order, their places and the ways a droplet on level ground takes drawn from the module's PCG,
+/// order, a block of the field at a time, their places and the ways a droplet on level ground
+/// takes drawn from the module's PCG,
 /// and the step is reckoned with addition, multiplication, division and square root alone, so a
 /// seed gives the same bits on every system. The numbers are a step's, and a step is a spacing.
 /// </para>
@@ -116,23 +117,72 @@ public sealed record HydraulicErosion : LandscapeStep
     /// <remarks>
     /// Beyer's numbers were given for heights from nothing to one, and a field in meters falls tens
     /// of times further a step. Reckoned against the field's own meters, 66,000 droplets over a
-    /// dome of 40 m on 129 by 129 points leave 80 hundredths of its peak and 749 points lower than
-    /// all eight about them, the ground pitted and its gullies faint. Against 40 m they leave 86
-    /// hundredths and 330 such pits and cut clean gullies, and a dome of 160 m against 160 m keeps
+    /// dome of 40 m on 129 by 129 points leave 81 hundredths of its peak and 725 points lower than
+    /// all eight about them, the ground pitted and its gullies faint. Against 40 m they leave 87
+    /// hundredths and 335 such pits and cut clean gullies, and a dome of 160 m against 160 m keeps
     /// the same share of its peak, so a scale near the hills' own height takes Beyer's numbers as
     /// he meant them.
     /// </remarks>
     public float Scale { get; init => field = value > 0f && float.IsFinite(value) ? value : throw Out(nameof(Scale), value, "a finite number of meters above nothing"); }
+
+    // The side of the square of cells whose droplets run one after another, so a droplet of 30
+    // steps reads and writes some 124 by 124 points, 60 KB, while they stand in the caches.
+    private const int Block = 64;
+
+    // How many droplets a block runs at a turn before the next block takes its own.
+    private const int Turn = 64;
+
+    // The places the droplets start at over a field's cells, in the order they run. Each block of
+    // cells takes its share of the droplets, its share of the cells, and the blocks take turns, a
+    // row of blocks at a time, each running some droplets at random within it at a turn. Drawn
+    // anywhere over the field, one droplet started some two thousand points from the one before
+    // on a field of 4,097 a side and each read the field afresh from memory, 583 ns a point where
+    // it was 434 at 2,049. A block's droplets run all at once cut the channels the first of them
+    // found ever deeper, a hill kept 80 hundredths of its peak where it kept 85, so the turns keep
+    // each place's droplets spread over the whole run as a draw anywhere spread them.
+    internal IEnumerable<Vector2> Starts(int columns, int rows)
+    {
+        var random = new Pcg(Seed);
+        var (cellsX, cellsZ) = (columns - 1, rows - 1);
+        var cells = (long)cellsX * cellsZ;
+        var blocks = new List<(int X, int Z, int Width, int Depth, int Count)>();
+        var (given, covered) = (0L, 0L);
+        for (var z0 = 0; z0 < cellsZ; z0 += Block)
+        {
+            for (var x0 = 0; x0 < cellsX; x0 += Block)
+            {
+                var (width, depth) = (Math.Min(Block, cellsX - x0), Math.Min(Block, cellsZ - z0));
+                covered += (long)width * depth;
+                var upTo = Droplets * covered / cells;
+                blocks.Add((x0, z0, width, depth, (int)(upTo - given)));
+                given = upTo;
+            }
+        }
+
+        for (var turn = 0; ; turn++)
+        {
+            var ran = false;
+            foreach (var (x0, z0, width, depth, count) in blocks)
+            {
+                for (var droplet = turn * Turn; droplet < Math.Min(count, (turn + 1) * Turn); droplet++, ran = true)
+                    yield return new Vector2(x0 + random.Unit() * width, z0 + random.Unit() * depth);
+            }
+
+            if (!ran) yield break;
+        }
+    }
 
     internal override void Apply(Heightfield field, ILandscapePictures? pictures)
     {
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var unit = 1f / Scale;
         var brush = Brush();
-        var random = new Pcg(Seed);
-        for (var droplet = 0; droplet < Droplets; droplet++)
+
+        // The ways a droplet on level ground takes, drawn apart from the places it starts at.
+        var random = new Pcg((ulong)Seed * 0x9E3779B97F4A7C15ul + 0xD0);
+        foreach (var start in Starts(columns, rows))
         {
-            var place = new Vector2(random.Unit() * (columns - 1), random.Unit() * (rows - 1));
+            var place = start;
             var way = Vector2.Zero;
             var (speed, water, sediment) = (1f, 1f, 0f);
             for (var step = 0; step < Lifetime; step++)

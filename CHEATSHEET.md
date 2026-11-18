@@ -28,7 +28,7 @@ float Slope(Vector2 place);                              // How steep the ground
 float Steepness(int column, int row);                    // How steep the ground is at a point as a rise over a run, the rise along X and along Z taken together, nothing on flat ground and one at 45 degrees
 float Steepness(Vector2 place);                          // How steep the ground is anywhere over the field as a rise over a run, between its points blended from theirs
 bool Covers(Vector2 place);                              // Whether a place lies over the field, its edge counted in
-RayHit? Raycast(Vector3 origin, Vector3 direction, float reach = Infinityf);  // Where a ray first meets the ground the field's tiles draw, or nothing
+RayHit? Raycast(Vector3 origin, Vector3 direction, float reach = float.PositiveInfinity);  // Where a ray first meets the ground the field's tiles draw, or nothing
 Heightfield Copy();                                      // A field of the same size holding the same heights, apart from this one
 
 record struct RayHit                                     // Where a ray met the ground, how far along it and the ground's way up there
@@ -133,7 +133,7 @@ int FirstColumn { get; init; }                           // The first column, fr
 int FirstRow { get; init; }                              // The first row, from zero along Z
 int LastColumn { get; init; }                            // The last column, at or past the first
 int LastRow { get; init; }                               // The last row, at or past the first
-IReadOnlyList<(int, int)> Tiles(Heightfield field, int tileCells = 64);  // The tiles of a field cut by Tiles whose corners a change of the points in the rectangle reaches, a row of tiles at a time
+IReadOnlyList<(int Column, int Row)> Tiles(Heightfield field, int tileCells = 64);  // The tiles of a field cut by Tiles whose corners a change of the points in the rectangle reaches, a row of tiles at a time
 
 class SplatMap                                           // How much of each of a few materials covers each point of a field, as weights that sum to one and as layers of RGBA bytes, four materials a layer, which an engine uploads as textures and blends its materials by
 int MostMaterials = 8;                                   // The most materials a map holds, two layers
@@ -146,7 +146,7 @@ SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules);  // Makes a fiel
 float Weight(int material, int column, int row);         // A material's weight at a point, from nothing to one, the materials' summing to one
 
 record SplatRule                                         // Where a material of a splat map lies, a range of height and a range of steepness, each with a width beyond it over which the material gives way
-SplatRule(string material, float lowest = -Infinityf, float highest = Infinityf, float heightBlend = 0f, float leastSteep = 0f, float mostSteep = Infinityf, float steepBlend = 0f);  // A material's rule
+SplatRule(string material, float lowest = float.NegativeInfinity, float highest = float.PositiveInfinity, float heightBlend = 0f, float leastSteep = 0f, float mostSteep = float.PositiveInfinity, float steepBlend = 0f);  // A material's rule
 string Material { get; }                                 // The material's name, which an engine draws the material by
 float Lowest { get; }                                    // The lowest height in meters it covers whole
 float Highest { get; }                                   // The highest height in meters it covers whole
@@ -173,11 +173,11 @@ IReadOnlyList<float> Shares { get; }                     // The shares, a row at
 float At(float u, float v);                              // The share at a place across the picture, from nothing at its first texel's middle to one at its last's along each way, bilinear between the texels
 
 class Placement                                          // Which of the places a planting gives stand on a field, kept by a rule's ranges of height and steepness and a density map, and lifted onto the ground
-IReadOnlyList<Planted> Keep(Heightfield field, IEnumerable<(Vector3, uint)> places, PlacementRule rule, DensityMap? density = null);  // Keeps the places that stand on a field by a rule and a density map
+IReadOnlyList<Planted> Keep(Heightfield field, IEnumerable<(Vector3 Place, uint Seed)> places, PlacementRule rule, DensityMap? density = null);  // Keeps the places that stand on a field by a rule and a density map
 float Draw(uint seed);                                   // The number a seed draws against a place's chance, from nothing up to one
 
 record PlacementRule                                     // Where a kind of plant may stand, a range of height and a range of steepness, each with a width beyond it over which the plant thins out, as a SplatRule gives a material's
-PlacementRule(float lowest = -Infinityf, float highest = Infinityf, float heightBlend = 0f, float leastSteep = 0f, float mostSteep = Infinityf, float steepBlend = 0f);  // A plant's rule
+PlacementRule(float lowest = float.NegativeInfinity, float highest = float.PositiveInfinity, float heightBlend = 0f, float leastSteep = 0f, float mostSteep = float.PositiveInfinity, float steepBlend = 0f);  // A plant's rule
 float Lowest { get; }                                    // The lowest height in meters it grows at whole
 float Highest { get; }                                   // The highest height in meters it grows at whole
 float HeightBlend { get; }                               // How many meters beyond either height it thins out over
@@ -211,7 +211,7 @@ float StepError(Heightfield field, int column, int row, int step, int tileCells 
 
 record LandscapeMesh                                     // One tile of a field as triangles, in meters with Y up about the field's middle, which an engine builds a mesh of
 LandscapeMesh(int column, int row, Vector3[] positions, Vector3[] normals, Vector2[] uvs, uint[] indices);  // A tile of its column and row among the field's tiles and its corners' arrays
-(Vector3, Vector3) Bounds { get; }                       // The least and the greatest corner of the box about every corner of the tile, its skirt's among them, which an engine culls the tile by
+(Vector3 Low, Vector3 High) Bounds { get; }              // The least and the greatest corner of the box about every corner of the tile, its skirt's among them, which an engine culls the tile by
 int Column { get; init; }                                // The tile's column among the field's tiles, from zero along X
 int Row { get; init; }                                   // The tile's row among the field's tiles, from zero along Z
 Vector3[] Positions { get; init; }                       // A corner a point of the field the tile covers, a row at a time along X and the rows along Z

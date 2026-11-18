@@ -461,3 +461,27 @@ does. Three tests hold an update over a moved cone equal to a whole map of the n
 and the weight, the texels outside the grown rectangle as they were, and an area at the edge cut to
 the field with another field's size and an area past the field refused. The tests pass, 110 where
 there were 107.
+
+The droplets' order in the commit carrying this line. A time a point is too unsteady for a test on a
+loaded machine, so the bound is on a counted proxy, said as one: the mean distance between one
+droplet's start and the next's at 4,097 points a side, 2,135.7 points with the droplets drawn
+anywhere, which failed a bound of 64 first. The droplets run a block of 64 points at a time, 35.0
+points apart after. A block's droplets run all at once cut deeper channels from the first droplets'
+paths, a hill keeping 80 hundredths of its peak where it kept 85, so the blocks take turns of 64
+droplets and each place's droplets stay spread over the whole run, the hill keeping 87, and the ways
+a droplet on level ground takes are drawn from a generator of their own. Read in turn under the same
+load, the droplets cost 403 ns a point at 4,097 a block at a time and 642 and 593 drawn anywhere,
+and the same a point at 2,049 and 4,097 a block at a time, in
+`2026-11-18-item-3-droplets-blocks.md`. In look the eroded field differs in where each gully runs
+and in nothing else the pair shows, the hills, the count of their gullies and the plains alike,
+`2026-11-18-item-3-droplets-blocks.webp` with the difference four times. The two pinned hashes the
+droplets reach are remade once, and every figure the droplets' tests and remarks quote is read
+again, the cone's flank worn by 6,845 cubic meters and its foot filled by 5,908, the bowl's 0.0007,
+the domes' 86.9 hundredths and 335 and 298 pits, and the ramp dug no point below its edge. Tools
+moves to `4e922ea` by its `pin.py`, which printed that the pin moved from `75d77f2` by 11 commits
+and that the cheatsheet's fact changed by `5bf6255` and `460a481`, whose form this repository's test
+already has, so no fact is owed, and wrote CHEATSHEET.md and DEVLOG.md again, the devlog with each
+day's commits. The cheatsheet written again changes six lines, the ray's reach and the two rules'
+ranges with their infinite defaults as `float.PositiveInfinity` and `float.NegativeInfinity`, and
+the area's tiles, the placement's places and the tile's bounds with their tuples' names. The tests
+pass, 111.

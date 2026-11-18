@@ -52,6 +52,12 @@ Tiles of noise and a cone drawn at a step by their distance, every point near in
 in blue and every sixteenth in red, with no skirts, where white cracks run along the borders between
 steps, and with skirts hung for the coarsest step, where none does.
 
+![](.github/assets/readings/2026-11-18-item-3-droplets-blocks.webp)
+150,000 droplets on noise, a dome and a cone, drawn anywhere over the field and a block of 64 points
+at a time with the blocks taking turns of 64 droplets, oblique, in contours and lit from above, and
+their difference four times, the hills, the count of their gullies and the plains alike and the
+difference darkest along single gullies, which run in other places.
+
 # The cost of a build by step
 
 An every-step recipe built at 513, 1,025, 2,049 and 4,097 points a side, a step at a time through a
@@ -118,9 +124,91 @@ field and the two scratch fields smoothing and thermal erosion take.
 | 4097 | splat map | 1013 | 335.7 | 60.4 | 20.00 |
 | 4097 | whole build | 18970 | 201.4 | 1130.2 | 12.00 |
 
+# Droplets a block at a time
+
+Hydraulic erosion's time a point, the droplets a quarter a point, read with the droplets drawn
+anywhere over the field (A) and a block of 64 points at a time, the blocks taking turns of 64 (B),
+the two programs built from the same source with the block set to the whole field for A and run
+one after the other under the machine's exclusive lock, the fastest of three runs each
+(`dotnet run -c Release --no-cache build/bench.cs -- <numbers.json> 2049 4097`). The machine
+carried a load of 15 from other sessions' work, which the lock does not keep off the processor,
+so the two are read in turn rather than against the morning's table.
+
+| Order | Round | 2,049 a side, ns a point | 4,097 a side, ns a point |
+|---|---:|---:|---:|
+| A, anywhere | 1 | 495.6 | 641.9 |
+| B, blocks | 1 | 397.2 | 402.9 |
+| A, anywhere | 2 | 430.7 | 592.8 |
+
+Drawn anywhere, a droplet at 4,097 a side cost 30 and 38 hundredths more a point than at 2,049,
+its field of 67 MB read afresh from memory. A block at a time, it costs the same at both sizes, and
+37 hundredths less than drawn anywhere at 4,097 in the same round. The second round's B was stopped
+to free the lock for a session waiting behind it.
+
+Commits that day
+
+- `06289bb` The droplets run a block of the field at a time in turns, so at 4,097 points a side they
+  cost 403 ns a point where drawn anywhere they cost 642, and the eroded field differs in where each
+  gully runs alone.
+- `70a2fbd` A splat map is weighed again over a change and the points beside it alone and gives the
+  rectangle an engine uploads, where a rebuild made the whole map again.
+- `1d99296` A ray meets the ground the tiles draw, walked a cell at a time over the field, so an
+  editor places a stamp where the pointer falls and a game drops what falls.
+- `8f13181` A tile holds its bounds and is drawn at a coarser step with a skirt hung below its
+  edges, so tiles at different steps meet with no crack, and the module gives the error in meters a
+  step leaves.
+- `1d73936` A bench times and weighs every step at four sizes, the tiles of one size share one index
+  array where each held its own, so they allocate 33 bytes a point where they allocated 57, and the
+  text names no engine.
+- `9add2a7` A cheat sheet written from the built library lists every public type and member, held to
+  it by a test, and the four positional records take constructors with summaries of their own.
+- `01fe17d` A recipe is written and read as JSON that builds the same bits, picture stamps take
+  their heights through ILandscapePictures, the one interface the module declares, and the README
+  says so where it said none.
+- `e619901` Placement keeps the places and seeds a planting gives by ranges of height and steepness
+  and a density map, lifting each onto the ground with its normal, and the devlog is linked from the
+  README and named with its command.
+- `a503f2a` The tests take the checks every module keeps from the Tools submodule in place of their
+  own copy, which found the README naming no LandscapeStep, and a clone without the submodule stops
+  with the command that fetches it.
+- `3629660` A test holds a hill of 40 m and one of 160 m, each eroded against its own height, to 84
+  hundredths of its peak and 500 pits, where against 1 m a hill keeps 80 and is pitted at 749
+  points.
+- `2fef9bd` Hydraulic erosion runs droplets that cut channels and fill the feet of slopes, their
+  fall reckoned against 40 m and the field's edge held as a base level, which a ramp draining off it
+  was dug 16.4 m below before and 0.009 m after.
+- `b491389` A host with no engine runs the README's smallest binding word for word, and a test holds
+  the README's block to the lines it runs.
+- `b399737` The README says how any engine binds the module, its conventions of units, axes, winding
+  and layers, the swap an engine of other axes makes, and the smallest binding.
+- `e4b7cb5` A splat map weighs up to eight materials at every point by ranges of height and
+  steepness, its weights summing to one and its RGBA layers of four materials summing to 255.
+- `ea1bc5d` The library builds as the assembly and package 3DEngine.Landscape and its tests as
+  3DEngine.Landscape.Tests, the namespace staying Landscape.
+- `952f49b` The recipe gains noise, terraces, smoothing and thermal erosion over eight neighbors,
+  which hold a slope to 1.08 times its talus where four held it to 1.41, and a builder that applies
+  a changed recipe again from its first changed step and names the points and tiles it changed.
+- `da8f91e` The module holds a heightfield built from a recipe of stamps and cut into tiles of
+  triangles, with a test that holds every comment line to 100 columns and the skeleton's long lines
+  wrapped.
+
+## 2026-11-17
+
+Commits that day
+
+- `34c3b63` The ignore file's note on the pictures folder names no one, and the guides spell
+  canceled.
+
 ## 2026-10-31
 
 Done that day
 
 - Item 1 at `81d2ba2`. The documents, one commit.
 - Item 2 at `35effea`. The skeleton, one commit after item 1.
+
+Commits that day
+
+- `35effea` The module gains its solution, an empty library whose public members need summaries, a
+  test that it loads, the version at 0.1 and a build workflow on Linux, Windows and macOS.
+- `81d2ba2` The module gains its documents, AGENTS.md, the README, STYLE.md, COMMITS.md and the code
+  of conduct as the engines keep them, with git's ignore and attribute files.
