@@ -28,7 +28,14 @@ float Slope(Vector2 place);                              // How steep the ground
 float Steepness(int column, int row);                    // How steep the ground is at a point as a rise over a run, the rise along X and along Z taken together, nothing on flat ground and one at 45 degrees
 float Steepness(Vector2 place);                          // How steep the ground is anywhere over the field as a rise over a run, between its points blended from theirs
 bool Covers(Vector2 place);                              // Whether a place lies over the field, its edge counted in
+RayHit? Raycast(Vector3 origin, Vector3 direction, float reach = Infinityf);  // Where a ray first meets the ground the field's tiles draw, or nothing
 Heightfield Copy();                                      // A field of the same size holding the same heights, apart from this one
+
+record struct RayHit                                     // Where a ray met the ground, how far along it and the ground's way up there
+RayHit(Vector3 place, float distance, Vector3 normal);   // A hit of its place, its distance and the ground's normal
+Vector3 Place { get; init; }                             // Where the ray met the ground, in meters about the field's middle
+float Distance { get; init; }                            // How far along the ray from its origin, in meters
+Vector3 Normal { get; init; }                            // The way up out of the ground there, at unit length, the field's own
 
 record Recipe                                            // A field's size and the ordered steps that make its heights, which a level keeps in place of the heights and builds again after each change
 int Format = 1;                                          // The format a recipe is written in, which Read takes and no other

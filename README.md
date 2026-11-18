@@ -12,7 +12,7 @@ the one interface it declares, `ILandscapePictures`, where it binds the module.
 
 | Type | What it is |
 |---|---|
-| `Heightfield` | Heights in meters on a grid of points, columns along X and rows along Z with Y up about the field's middle, sampled anywhere for a height, a normal and a slope |
+| `Heightfield` | Heights in meters on a grid of points, columns along X and rows along Z with Y up about the field's middle, sampled anywhere for a height, a normal and a slope, and met by a ray in `Heightfield.Raycast`, which gives a `RayHit` where the ray first meets the drawn ground |
 | `Recipe` | A field's size and its ordered steps, each a `LandscapeStep`, a stamp or an operation of the module's, built from flat ground each time |
 | `Stamp` | A shape, `StampShape`, pressed in at a place with a radius and a height and met by a blend, `StampBlend` |
 | `Noise`, `Terrace`, `Smoothing`, `ThermalErosion`, `HydraulicErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur, ground slumping to its talus, and droplets from a seed cutting channels and filling the feet of slopes |

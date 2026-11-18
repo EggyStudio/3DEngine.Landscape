@@ -175,6 +175,104 @@ public sealed class Heightfield
         return place.X >= -half.X && place.X <= half.X && place.Y >= -half.Y && place.Y <= half.Y;
     }
 
+    /// <summary>Where a ray first meets the ground the field's tiles draw, or nothing.</summary>
+    /// <param name="origin">Where the ray starts, in meters about the field's middle.</param>
+    /// <param name="direction">The way it runs, of any length but none.</param>
+    /// <param name="reach">How far along it a hit counts, in meters.</param>
+    /// <exception cref="ArgumentException">
+    /// The origin is not finite, or the direction has no length.
+    /// </exception>
+    /// <remarks>
+    /// The ray is cut to the field's rectangle and walks it a cell at a time in the order it
+    /// crosses them, meeting each cell's two triangles as <see cref="LandscapeGeometry.Tile"/>
+    /// draws them at a step of one, from either side, so the first cell it meets the ground in
+    /// holds the nearest hit and the walk crosses a field of 4,097 points a side in some 8,000
+    /// cells at most rather than its 33 million triangles.
+    /// </remarks>
+    public RayHit? Raycast(Vector3 origin, Vector3 direction, float reach = float.PositiveInfinity)
+    {
+        if (!float.IsFinite(origin.X) || !float.IsFinite(origin.Y) || !float.IsFinite(origin.Z))
+            throw new ArgumentException("A ray's origin is finite.", nameof(origin));
+        var length = MathF.Sqrt(direction.X * direction.X + direction.Y * direction.Y + direction.Z * direction.Z);
+        if (!(length > 0f) || !float.IsFinite(length)) throw new ArgumentException("A ray runs some way.", nameof(direction));
+        var way = direction / length;
+
+        // The ray in the grid's units, a point's column and row, and the stretch of it over the
+        // field's rectangle.
+        var (gx, gz) = (origin.X / Spacing + (Columns - 1) * 0.5f, origin.Z / Spacing + (Rows - 1) * 0.5f);
+        var (wx, wz) = (way.X / Spacing, way.Z / Spacing);
+        var (enter, leave) = (0f, reach);
+        if (!Slab(gx, wx, Columns - 1, ref enter, ref leave) || !Slab(gz, wz, Rows - 1, ref enter, ref leave)) return null;
+
+        var (x, z) = (gx + wx * enter, gz + wz * enter);
+        var (column, row) = (Math.Clamp((int)MathF.Floor(x), 0, Columns - 2), Math.Clamp((int)MathF.Floor(z), 0, Rows - 2));
+        var (stepX, stepZ) = (wx > 0f ? 1 : -1, wz > 0f ? 1 : -1);
+        var nextX = wx == 0f ? float.PositiveInfinity : ((wx > 0f ? column + 1 : column) - gx) / wx;
+        var nextZ = wz == 0f ? float.PositiveInfinity : ((wz > 0f ? row + 1 : row) - gz) / wz;
+        var (acrossX, acrossZ) = (wx == 0f ? float.PositiveInfinity : MathF.Abs(1f / wx), wz == 0f ? float.PositiveInfinity : MathF.Abs(1f / wz));
+        while (true)
+        {
+            if (Crossing(origin, way, column, row) is { } distance && distance <= reach)
+            {
+                var place = origin + way * distance;
+                return new RayHit(place, distance, Normal(new Vector2(place.X, place.Z)));
+            }
+
+            if (MathF.Min(nextX, nextZ) > leave) return null;
+            if (nextX < nextZ)
+            {
+                column += stepX;
+                nextX += acrossX;
+            }
+            else
+            {
+                row += stepZ;
+                nextZ += acrossZ;
+            }
+
+            if ((uint)column > (uint)(Columns - 2) || (uint)row > (uint)(Rows - 2)) return null;
+        }
+    }
+
+    // Cuts the stretch of a ray to where its one coordinate lies from nothing to the far side, or
+    // says the ray never lies there.
+    private static bool Slab(float from, float way, float far, ref float enter, ref float leave)
+    {
+        if (way == 0f) return from >= 0f && from <= far;
+        var (a, b) = ((0f - from) / way, (far - from) / way);
+        if (a > b) (a, b) = (b, a);
+        (enter, leave) = (MathF.Max(enter, a), MathF.Min(leave, b));
+        return enter <= leave;
+    }
+
+    // The nearest crossing of a ray with a cell's two triangles, the near-left, far-left and
+    // near-right corners and the near-right, far-left and far-right, by Möller and Trumbore's rule
+    // from either side, each edge taken in by a millionth so a ray down an edge is met.
+    private float? Crossing(Vector3 origin, Vector3 way, int column, int row)
+    {
+        Vector3 Corner(int c, int r) => new(Place(c, r).X, this[c, r], Place(c, r).Y);
+        var (nearLeft, nearRight, farLeft, farRight) = (Corner(column, row), Corner(column + 1, row), Corner(column, row + 1), Corner(column + 1, row + 1));
+        var (first, second) = (Triangle(origin, way, nearLeft, farLeft, nearRight), Triangle(origin, way, nearRight, farLeft, farRight));
+        return first is null ? second : second is null ? first : MathF.Min(first.Value, second.Value);
+    }
+
+    private static float? Triangle(Vector3 origin, Vector3 way, Vector3 a, Vector3 b, Vector3 c)
+    {
+        const float edge = 1e-6f;
+        var (e1, e2) = (b - a, c - a);
+        var p = Vector3.Cross(way, e2);
+        var det = Vector3.Dot(e1, p);
+        if (det == 0f) return null;
+        var s = origin - a;
+        var u = Vector3.Dot(s, p) / det;
+        if (u < -edge || u > 1f + edge) return null;
+        var q = Vector3.Cross(s, e1);
+        var v = Vector3.Dot(way, q) / det;
+        if (v < -edge || u + v > 1f + edge) return null;
+        var distance = Vector3.Dot(e2, q) / det;
+        return distance >= 0f ? distance : null;
+    }
+
     /// <summary>A field of the same size holding the same heights, apart from this one.</summary>
     public Heightfield Copy()
     {

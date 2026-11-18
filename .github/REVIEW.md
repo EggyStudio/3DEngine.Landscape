@@ -433,3 +433,18 @@ the surface's up, the shared indices, the error against every point read under t
 and the refusals. The reading is `2026-11-18-item-3-distance.webp`, tiles at steps 1, 4 and 16 by
 distance with white cracks along the borders without skirts and none with them. The tests pass, 102
 where there were 91.
+
+The second of the three in the commit carrying this line, a ray onto the ground. Its tests came
+first and failed for want of the member. `Heightfield.Raycast` cuts a ray to the field's rectangle
+and walks it a cell at a time in the order it crosses them, meeting each cell's two triangles as the
+tiles draw them at a step of one, from either side, and gives a `RayHit` of the place, the distance
+and the field's normal there, or nothing past its reach, off the field or above the ground. Five
+tests hold a ray straight down meeting a dome at its point's height, a slanted ray meeting a ramp at
+50 thirds of a meter along it, rays above everything, leaving the field and out of reach missing and
+one coming in from beyond the edge meeting, 60 rays at random against the nearest crossing of every
+one of the tiles' 8,192 triangles to a millimeter, and the refusals of a ray of no way and an origin
+not finite. The test of the dome first asked the hit's height exactly and the ray's arithmetic gave
+it 3 units of the last place apart, so it reads to a ten-thousandth. The README's row for the field
+names the ray and `RayHit`. The cheatsheet's writer prints a default of infinity as `Infinityf`,
+which C# does not read, in the ray's reach and in the two rules' ranges, a finding for Tools. The
+tests pass, 107 where there were 102.
