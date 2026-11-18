@@ -65,9 +65,29 @@ public static class Placement
 /// <summary>
 /// A place kept on the ground, where it stands, the ground's way up there and its seed.
 /// </summary>
-/// <param name="Place">Where it stands, on the ground, in meters about the field's middle.</param>
-/// <param name="Normal">
-/// The way up out of the ground there, at unit length, which a plant may lean by.
-/// </param>
-/// <param name="Seed">The seed it came with.</param>
-public readonly record struct Planted(Vector3 Place, Vector3 Normal, uint Seed);
+public readonly record struct Planted
+{
+    /// <summary>A kept place, where it stands, the ground's way up there and its seed.</summary>
+    /// <param name="place">
+    /// Where it stands, on the ground, in meters about the field's middle.
+    /// </param>
+    /// <param name="normal">
+    /// The way up out of the ground there, at unit length, which a plant may lean by.
+    /// </param>
+    /// <param name="seed">The seed it came with.</param>
+    public Planted(Vector3 place, Vector3 normal, uint seed)
+    {
+        (Place, Normal, Seed) = (place, normal, seed);
+    }
+
+    /// <summary>Where it stands, on the ground, in meters about the field's middle.</summary>
+    public Vector3 Place { get; init; }
+
+    /// <summary>
+    /// The way up out of the ground there, at unit length, which a plant may lean by.
+    /// </summary>
+    public Vector3 Normal { get; init; }
+
+    /// <summary>The seed it came with.</summary>
+    public uint Seed { get; init; }
+}

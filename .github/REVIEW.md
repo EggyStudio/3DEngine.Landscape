@@ -350,3 +350,12 @@ among them a recipe of every step read back equal and building the same bits wit
 the file of one stamp as written, six refusals by name, and the picture stamp's rectangle, edge,
 missing picture and rebuild. The reading is `2026-11-18-item-3-picture.webp`. The strict build is
 clean and the tests pass, 87 where there were 75.
+
+The cheat sheet in the commit carrying this line. Tools moves to `3720852`, `ModuleTests` holds
+the fifth fact, and CHEATSHEET.md is written by `Cheatsheet.Write` with `CHEATSHEET_WRITE=1`
+under a short opening by hand, linked from the README's top line beside the devlog and named in
+AGENTS.md's documents table with its command. It lists 25 types and 149 members. The first writing
+showed the four positional records, `LandscapeChange`, `LandscapeArea`, `Planted` and
+`LandscapeMesh`, with constructors of no summary, since a record's primary constructor takes none
+of its own, so each is a record with a constructor and properties written out and a summary each,
+the same members and equality. The tests pass, 88.

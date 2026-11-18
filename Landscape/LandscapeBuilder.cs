@@ -118,11 +118,33 @@ public sealed class LandscapeBuilder
 }
 
 /// <summary>What a rebuild did, which steps it applied and which points it changed.</summary>
-/// <param name="FirstStep">
-/// The first step applied, the first that differed from the recipe before.
-/// </param>
-/// <param name="StepsApplied">How many steps were applied, the first and those after it.</param>
-/// <param name="Changed">
-/// The rectangle about the points whose heights changed, or nothing where none did.
-/// </param>
-public readonly record struct LandscapeChange(int FirstStep, int StepsApplied, LandscapeArea? Changed);
+public readonly record struct LandscapeChange
+{
+    /// <summary>
+    /// A rebuild's account, its first step applied, how many it applied and the points it changed.
+    /// </summary>
+    /// <param name="firstStep">
+    /// The first step applied, the first that differed from the recipe before.
+    /// </param>
+    /// <param name="stepsApplied">
+    /// How many steps were applied, the first and those after it.
+    /// </param>
+    /// <param name="changed">
+    /// The rectangle about the points whose heights changed, or nothing where none did.
+    /// </param>
+    public LandscapeChange(int firstStep, int stepsApplied, LandscapeArea? changed)
+    {
+        (FirstStep, StepsApplied, Changed) = (firstStep, stepsApplied, changed);
+    }
+
+    /// <summary>The first step applied, the first that differed from the recipe before.</summary>
+    public int FirstStep { get; init; }
+
+    /// <summary>How many steps were applied, the first and those after it.</summary>
+    public int StepsApplied { get; init; }
+
+    /// <summary>
+    /// The rectangle about the points whose heights changed, or nothing where none did.
+    /// </summary>
+    public LandscapeArea? Changed { get; init; }
+}

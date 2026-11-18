@@ -6,21 +6,6 @@ namespace Landscape;
 /// One tile of a field as triangles, in meters with Y up about the field's middle, which an engine
 /// builds a mesh of.
 /// </summary>
-/// <param name="Column">The tile's column among the field's tiles, from zero along X.</param>
-/// <param name="Row">The tile's row among the field's tiles, from zero along Z.</param>
-/// <param name="Positions">
-/// A corner a point of the field the tile covers, a row at a time along X and the rows along Z.
-/// </param>
-/// <param name="Normals">
-/// The way up out of the ground at each corner, the field's own at its point.
-/// </param>
-/// <param name="Uvs">
-/// Where each corner falls over the whole field, from nothing at its first point to one at its
-/// last, X in X and Z in Y.
-/// </param>
-/// <param name="Indices">
-/// Three corners a triangle, two triangles a cell, counter-clockwise seen from above.
-/// </param>
 /// <remarks>
 /// Neighboring tiles share the corners of their common edge, each tile holding its own copy, and
 /// give them the same positions and normals, since both are the field's at that point, so the tiles
@@ -30,4 +15,55 @@ namespace Landscape;
 /// right-handed axes, and an engine that culls the other side takes each triangle's corners in the
 /// other order.
 /// </remarks>
-public sealed record LandscapeMesh(int Column, int Row, Vector3[] Positions, Vector3[] Normals, Vector2[] Uvs, uint[] Indices);
+public sealed record LandscapeMesh
+{
+    /// <summary>
+    /// A tile of its column and row among the field's tiles and its corners' arrays.
+    /// </summary>
+    /// <param name="column">The tile's column among the field's tiles, from zero along X.</param>
+    /// <param name="row">The tile's row among the field's tiles, from zero along Z.</param>
+    /// <param name="positions">
+    /// A corner a point of the field the tile covers, a row at a time along X and the rows along Z.
+    /// </param>
+    /// <param name="normals">
+    /// The way up out of the ground at each corner, the field's own at its point.
+    /// </param>
+    /// <param name="uvs">
+    /// Where each corner falls over the whole field, from nothing at its first point to one at its
+    /// last, X in X and Z in Y.
+    /// </param>
+    /// <param name="indices">
+    /// Three corners a triangle, two triangles a cell, counter-clockwise seen from above.
+    /// </param>
+    public LandscapeMesh(int column, int row, Vector3[] positions, Vector3[] normals, Vector2[] uvs, uint[] indices)
+    {
+        (Column, Row, Positions, Normals, Uvs, Indices) = (column, row, positions, normals, uvs, indices);
+    }
+
+    /// <summary>The tile's column among the field's tiles, from zero along X.</summary>
+    public int Column { get; init; }
+
+    /// <summary>The tile's row among the field's tiles, from zero along Z.</summary>
+    public int Row { get; init; }
+
+    /// <summary>
+    /// A corner a point of the field the tile covers, a row at a time along X and the rows along Z.
+    /// </summary>
+    public Vector3[] Positions { get; init; }
+
+    /// <summary>
+    /// The way up out of the ground at each corner, the field's own at its point.
+    /// </summary>
+    public Vector3[] Normals { get; init; }
+
+    /// <summary>
+    /// Where each corner falls over the whole field, from nothing at its first point to one at its
+    /// last, X in X and Z in Y.
+    /// </summary>
+    public Vector2[] Uvs { get; init; }
+
+    /// <summary>
+    /// Three corners a triangle, two triangles a cell, counter-clockwise seen from above.
+    /// </summary>
+    public uint[] Indices { get; init; }
+}

@@ -42,6 +42,13 @@ public sealed class ModuleTests
     }
 
     [Fact]
+    public void The_Cheatsheet_Is_What_The_Built_Library_Writes()
+    {
+        var fault = ModuleChecks.CheatsheetFault(Assembly.Load(Library), Readme, Path.Combine(Root, "CHEATSHEET.md"));
+        Assert.True(fault is null, fault);
+    }
+
+    [Fact]
     public void The_Readmes_Binding_Block_Stands_Word_For_Word_In_The_Host()
     {
         var fault = ModuleChecks.BindingBlock(Readme, File.ReadAllText(Path.Combine(Root, Host)));

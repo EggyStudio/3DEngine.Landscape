@@ -1,6 +1,6 @@
 # Landscape
 
-[Devlog](DEVLOG.md)
+[Devlog](DEVLOG.md) [Cheat sheet](CHEATSHEET.md)
 
 Landscape is a library both engines, 3DEngine and BevyCSharp, take as a git submodule, for a
 heightfield whose recipe is an ordered list of stamps and procedural operations applied again on

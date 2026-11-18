@@ -3,12 +3,30 @@ namespace Landscape;
 /// <summary>
 /// A rectangle of a field's points, from its first column and row to its last, both kept.
 /// </summary>
-/// <param name="FirstColumn">The first column, from zero along X.</param>
-/// <param name="FirstRow">The first row, from zero along Z.</param>
-/// <param name="LastColumn">The last column, at or past the first.</param>
-/// <param name="LastRow">The last row, at or past the first.</param>
-public readonly record struct LandscapeArea(int FirstColumn, int FirstRow, int LastColumn, int LastRow)
+public readonly record struct LandscapeArea
 {
+    /// <summary>A rectangle from its first column and row to its last.</summary>
+    /// <param name="firstColumn">The first column, from zero along X.</param>
+    /// <param name="firstRow">The first row, from zero along Z.</param>
+    /// <param name="lastColumn">The last column, at or past the first.</param>
+    /// <param name="lastRow">The last row, at or past the first.</param>
+    public LandscapeArea(int firstColumn, int firstRow, int lastColumn, int lastRow)
+    {
+        (FirstColumn, FirstRow, LastColumn, LastRow) = (firstColumn, firstRow, lastColumn, lastRow);
+    }
+
+    /// <summary>The first column, from zero along X.</summary>
+    public int FirstColumn { get; init; }
+
+    /// <summary>The first row, from zero along Z.</summary>
+    public int FirstRow { get; init; }
+
+    /// <summary>The last column, at or past the first.</summary>
+    public int LastColumn { get; init; }
+
+    /// <summary>The last row, at or past the first.</summary>
+    public int LastRow { get; init; }
+
     /// <summary>
     /// The tiles of a field cut by <see cref="LandscapeGeometry.Tiles"/> whose corners a change of
     /// the points in the rectangle reaches, a row of tiles at a time.
