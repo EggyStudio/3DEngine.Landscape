@@ -292,3 +292,12 @@ to 0.0007, the ramp, level ground staying level and the refusals. 150,000 drople
 points still wear the hills far lower, so the count is the strength. The reading is
 `2026-11-18-item-3-droplets.webp`, before, the edge worn and the edge held. The strict build is
 clean and the tests pass, 62 where there were 56.
+
+The scale's test in the commit carrying this line, with a correction to the Reply above. The hills
+worn to plains were the edge fault's, which stood in that render, and not the scale's. With the
+edge held, 66,000 droplets over a dome of 40 m reckoned against 1 m keep 80.3 hundredths of its
+peak and leave 749 pits, points lower than all eight about them, where against 40 m they keep 85.55
+and leave 330, and a dome of 160 m against 160 m keeps 85.56 and leaves 266, so the scale decides
+clean gullies against a pitted ground and a share of the peak, and a hill against its own height
+erodes alike at either size. The test holds both domes to 84 hundredths of their peaks and 500 pits
+at most, and the scale's remarks say so. The tests pass, 64.

@@ -84,6 +84,45 @@ public class HydraulicErosionTests
         Assert.True(ramp.Heights.Min() >= edge - BelowEdge, $"The ground was dug to {ramp.Heights.Min()}, {edge - ramp.Heights.Min()} m below the edge's lowest point.");
     }
 
+    [Theory]
+    [InlineData(40f)]
+    [InlineData(160f)]
+    public void A_Hill_Reckoned_Against_Its_Own_Height_Keeps_Its_Peak_And_Cuts_Gullies_Without_Pits(float height)
+    {
+        var recipe = new Recipe(129, 129, 1f, [new Noise(6, 32f, 4, 1f), new Stamp(StampShape.Dome, Vector2.Zero, 50f, height)]);
+        var before = recipe.Build();
+        var after = before.Copy();
+        new HydraulicErosion(3, 66_000, scale: height).Apply(after);
+
+        var kept = after.Heights.Max() / before.Heights.Max();
+        Assert.InRange(kept, PeakKept, PeakKept + 0.03f);
+        Assert.True(Pits(after) <= MostPits, $"The ground holds {Pits(after)} pits.");
+    }
+
+    // The points inside the edge lower than all eight about them.
+    private static int Pits(Heightfield field)
+    {
+        var pits = 0;
+        for (var row = 1; row < field.Rows - 1; row++)
+        {
+            for (var column = 1; column < field.Columns - 1; column++)
+            {
+                var lowest = true;
+                for (var z = -1; z <= 1; z++)
+                {
+                    for (var x = -1; x <= 1; x++)
+                    {
+                        if ((x != 0 || z != 0) && field[column + x, row + z] <= field[column, row]) lowest = false;
+                    }
+                }
+
+                if (lowest) pits++;
+            }
+        }
+
+        return pits;
+    }
+
     [Fact]
     public void Level_Ground_Stays_Level()
     {
@@ -114,6 +153,11 @@ public class HydraulicErosionTests
     // cubic meters were 39,313.0197 after 5,000 droplets, the float sums of their moves rounding
     // apart by 0.0007. The ramp was dug 0.009 m below its edge's lowest point, where it was 16.4 m
     // with the edge worn and never filled. Each tolerance is some twice what was read.
+    // A dome of 40 m against 40 m and one of 160 m against 160 m kept 85.55 and 85.56 hundredths of
+    // their peaks after 66,000 droplets and held 330 and 266 pits, where against 1 m and 4 m they
+    // kept 80.3 and 81.1 and held 749 and 666, so the test asks 84 hundredths and 500 pits at most.
+    private const float PeakKept = 0.84f;
+    private const int MostPits = 500;
     private const float BelowEdge = 0.02f;
     private const double Worn = 1_000;
     private const double VolumeTolerance = 0.002;

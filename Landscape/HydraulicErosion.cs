@@ -115,11 +115,12 @@ public sealed record HydraulicErosion : LandscapeStep
     /// </summary>
     /// <remarks>
     /// Beyer's numbers were given for heights from nothing to one, and a field in meters falls tens
-    /// of times further a step, so a droplet's speed and capacity grew past any fall and wore hills
-    /// of 40 m to plains with 150,000 droplets over 193 by 193 points. Reckoned against 40 m the
-    /// same droplets cut the hills into gullies and leave their shape, against 10 m they wear them
-    /// lower, and against 160 m the least capacity, which is a share of the scale, roughens the
-    /// plains between them.
+    /// of times further a step. Reckoned against the field's own meters, 66,000 droplets over a
+    /// dome of 40 m on 129 by 129 points leave 80 hundredths of its peak and 749 points lower than
+    /// all eight about them, the ground pitted and its gullies faint. Against 40 m they leave 86
+    /// hundredths and 330 such pits and cut clean gullies, and a dome of 160 m against 160 m keeps
+    /// the same share of its peak, so a scale near the hills' own height takes Beyer's numbers as
+    /// he meant them.
     /// </remarks>
     public float Scale { get; init => field = value > 0f && float.IsFinite(value) ? value : throw Out(nameof(Scale), value, "a finite number of meters above nothing"); }
 
