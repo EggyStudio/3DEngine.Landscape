@@ -42,6 +42,8 @@ git submodule add https://github.com/EggyStudio/Landscape.git modules/Landscape
 <ProjectReference Include="..\modules\Landscape\Landscape\Landscape.csproj" />
 ```
 
+The project builds the assembly `3DEngine.Landscape`, whose types are in the namespace `Landscape`.
+
 A clone of the engine fetches the module with `git clone --recurse-submodules`, or with
 `git submodule update --init` in a clone made without it, and a workflow checks it out with
 `submodules: true` on `actions/checkout`. A change the engine uses is committed and pushed here

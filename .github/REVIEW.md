@@ -107,6 +107,21 @@ session pushes.
     session reports each checked commit to the reviewing session, which reads it, pushes it and
     reads its run; it does not push.
 
+7. **The module is agnostic enough that a stranger binds it in an engine of their own from its
+    README alone (2026-11-18 17:28).** It asks a README section, Binding it in your engine, with
+    every interface the module declares, the conventions it stands on and the smallest binding that
+    works, a small host in the tests that implements those interfaces with no engine and that the
+    section's steps are run against, a test that fails where the library references an engine, a
+    window or a graphics API, the form in the Tools module's ReferenceTests.cs, and no engine's name
+    in a public member or its summary. The two engines appear in the README as examples. A public
+    shape that fits the two engines alone is named in a Reply before it changes.
+
+8. **The package id and the assembly are 3DEngine.Landscape and the namespace stays Landscape
+    (2026-11-18 17:28).** The prefix gives a unique name. A package is published when the time is
+    right and on the owner's word, for a reader who takes the module alone. The engines keep taking
+    the module as a git submodule, compiled with them and carried inside each engine's one package.
+    Folders and project file names stay.
+
 ## Replies
 
 The first Reply, read against the tree at `34c3b63`. Items 1 and 2 are done as the head says and
@@ -223,3 +238,10 @@ counter-clockwise from above, which a Z-up or left-handed engine takes by swappi
 winding. I propose to keep the shape and state the convention in the README's binding section with
 the swap a Z-up engine makes, rather than give the mesh an axis option, since every engine converts
 once where it builds its mesh.
+
+The names in the commit carrying this line. The library's project builds the assembly and names
+the package `3DEngine.Landscape`, `IsPackable` staying false, and the tests' assembly is
+`3DEngine.Landscape.Tests`, the folders, the project files and the namespace `Landscape` as they
+were. The test that loads the library loads it by the new name and checks a type of its own is in
+it, the internals are visible to the tests under theirs, and the README names the assembly and the
+namespace. The tests pass, 47.
