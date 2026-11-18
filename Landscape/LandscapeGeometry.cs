@@ -126,7 +126,43 @@ public static class LandscapeGeometry
             foreach (var z in zs) Corner(xs[^1], z, skirt);
         }
 
-        return new LandscapeMesh(column, row, positions, normals, uvs, Indices(width, depth, skirted));
+        return new LandscapeMesh(column, row, positions, normals, uvs, Holed(field, firstColumn, firstRow, xs, zs, Indices(width, depth, skirted)));
+    }
+
+    // A tile's indices with the triangles of each of its cells that holds a hole's cell left out,
+    // or the shared array where it holds none. The surface's triangles come first, six a cell a row
+    // of cells at a time, and the skirt's after them.
+    private static uint[] Holed(Heightfield field, int firstColumn, int firstRow, int[] xs, int[] zs, uint[] shared)
+    {
+        if (field.Holes is null) return shared;
+        var (across, along) = (xs.Length - 1, zs.Length - 1);
+        var left = new bool[across * along];
+        var any = false;
+        for (var j = 0; j < along; j++)
+        {
+            for (var i = 0; i < across; i++)
+            {
+                for (var z = firstRow + zs[j]; z < firstRow + zs[j + 1] && !left[j * across + i]; z++)
+                {
+                    for (var x = firstColumn + xs[i]; x < firstColumn + xs[i + 1]; x++)
+                    {
+                        if (!field.IsHole(x, z)) continue;
+                        any = left[j * across + i] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!any) return shared;
+        var kept = new List<uint>(shared.Length);
+        for (var cell = 0; cell < left.Length; cell++)
+        {
+            if (!left[cell]) kept.AddRange(shared.AsSpan(cell * 6, 6));
+        }
+
+        kept.AddRange(shared.AsSpan(left.Length * 6));
+        return [.. kept];
     }
 
     /// <summary>

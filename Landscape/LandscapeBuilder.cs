@@ -136,6 +136,21 @@ public sealed class LandscapeBuilder
             }
         }
 
+        // A cell that opens or closes as a hole changes what its four corners draw, so they join
+        // the rectangle though no height of theirs changed.
+        if (before.Holes is not null || after.Holes is not null)
+        {
+            for (var row = 0; row < after.Rows - 1; row++)
+            {
+                for (var column = 0; column < after.Columns - 1; column++)
+                {
+                    if (before.IsHole(column, row) == after.IsHole(column, row)) continue;
+                    (first, last) = (Math.Min(first, column), Math.Max(last, column + 1));
+                    (front, back) = (Math.Min(front, row), Math.Max(back, row + 1));
+                }
+            }
+        }
+
         return last < 0 ? null : new LandscapeArea(first, front, last, back);
     }
 }

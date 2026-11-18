@@ -51,6 +51,29 @@ public sealed class Heightfield
     public float[] Heights { get; }
 
     /// <summary>
+    /// Which cells are holes, a cell between four points a row at a time, each row along X and
+    /// the rows along Z, or nothing where the field has none.
+    /// </summary>
+    /// <remarks>
+    /// A hole's cell is drawn by no tile and met by no ray, and its heights stand as the steps left
+    /// them, so a physics heightfield that takes holes takes this array beside the heights.
+    /// </remarks>
+    public bool[]? Holes { get; private set; }
+
+    /// <summary>Whether a cell is a hole.</summary>
+    /// <param name="column">The cell's column, the column of its least corner.</param>
+    /// <param name="row">The cell's row, the row of its least corner.</param>
+    public bool IsHole(int column, int row)
+    {
+        if ((uint)column >= (uint)(Columns - 1)) throw new ArgumentOutOfRangeException(nameof(column), column, $"The field's cells are from zero up to {Columns - 1}.");
+        if ((uint)row >= (uint)(Rows - 1)) throw new ArgumentOutOfRangeException(nameof(row), row, $"The field's cells are from zero up to {Rows - 1}.");
+        return Holes is { } holes && holes[row * (Columns - 1) + column];
+    }
+
+    // Marks a cell a hole, making the field's holes where it had none.
+    internal void MakeHole(int column, int row) => (Holes ??= new bool[(Columns - 1) * (Rows - 1)])[row * (Columns - 1) + column] = true;
+
+    /// <summary>
     /// The field's width along X in X and its depth along Z in Y, in meters, from its first point
     /// to its last.
     /// </summary>
@@ -250,6 +273,7 @@ public sealed class Heightfield
     // from either side, each edge taken in by a millionth so a ray down an edge is met.
     private float? Crossing(Vector3 origin, Vector3 way, int column, int row)
     {
+        if (IsHole(column, row)) return null;
         Vector3 Corner(int c, int r) => new(Place(c, r).X, this[c, r], Place(c, r).Y);
         var (nearLeft, nearRight, farLeft, farRight) = (Corner(column, row), Corner(column + 1, row), Corner(column, row + 1), Corner(column + 1, row + 1));
         var (first, second) = (Triangle(origin, way, nearLeft, farLeft, nearRight), Triangle(origin, way, nearRight, farLeft, farRight));
@@ -278,6 +302,7 @@ public sealed class Heightfield
     {
         var copy = new Heightfield(Columns, Rows, Spacing);
         Heights.CopyTo(copy.Heights, 0);
+        copy.Holes = Holes is null ? null : [.. Holes];
         return copy;
     }
 

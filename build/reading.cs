@@ -44,6 +44,14 @@ var recipes = new Dictionary<string, Recipe>
     ["distance-bare"] = Distance(),
     // The distance recipe's field drawn whole at every point, at every 16th lit by its corners'
     // normals, and at every 16th lit by the normal map, the far-off tile's two lightings.
+    // The distance recipe's field with a hole in the cone's flank and one on the plain, a cave's
+    // mouth and a shaft's, drawn as the tiles leave them out.
+    ["holes"] = new(257, 257, 1f,
+    [
+        .. Distance().Steps,
+        new Hole(new(-35f, 25f), 6f),
+        new Hole(new(60f, -50f), 10f),
+    ]),
     ["far-fine"] = Distance(),
     ["far-corners"] = Distance(),
     ["far-mapped"] = Distance(),

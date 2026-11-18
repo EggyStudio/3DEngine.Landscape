@@ -70,6 +70,11 @@ its neighbors and each point gathering its share from them, oblique, in contours
 and their difference four times, white throughout since the two differ by one 255th of a channel at
 most.
 
+![](.github/assets/readings/2026-11-18-item-3-holes.webp)
+Noise and a cone with a hole of 6 m in the cone's flank and one of 10 m on the plain, the white
+ground showing through where no tile draws a cell, oblique and lit from above, and the contours from
+above running through both since a hole keeps the heights the steps left.
+
 # The cost of a build by step
 
 An every-step recipe built at 513, 1,025, 2,049 and 4,097 points a side, a step at a time through a
@@ -223,6 +228,9 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `6184a79` Thermal erosion gathers each point's share from its neighbors in one order, so its rows
+  run on any thread with the same bits and it runs 6.4 times as fast on eight at 4,097 points a
+  side.
 - `adc1b7d` A normal map gives the field's normal at every point as a texture, written again over a
   change, so a tile drawn far off at a coarse step is lit by the field's own detail.
 - `9c9e44c` A build shares the rows of every step whose points are reckoned alone among the threads

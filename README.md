@@ -18,6 +18,7 @@ the one interface it declares, `ILandscapePictures`, where it binds the module.
 | `Noise`, `Terrace`, `Smoothing`, `ThermalErosion`, `HydraulicErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur, ground slumping to its talus, and droplets from a seed cutting channels and filling the feet of slopes |
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
 | `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
+| `Hole` | A hole in the ground, the cells whose middles lie within its radius, which no tile draws and no ray meets, for a cave's or a tunnel's mouth an engine fills with a mesh of its own, the field's `Heightfield.Holes` carrying the cells |
 | `PictureStamp` | A picture's heights pressed in over a rectangle, a share of its height a texel, drawn toward by a blend and faded in over an edge, the picture a `HeightPicture` the engine reads through `ILandscapePictures` |
 | `NormalMap` | The field's normals as RGBA bytes, a texel a point, the way up in the field's axes from minus one at 0 to one at 255, written again over a change, which lights a tile drawn far off at the field's own detail |
 | `Placement`, `PlacementRule`, `DensityMap` | The places a planting gives, as a place and a seed each, kept by a rule's ranges of height and steepness and a density map, painted or taken from a splat material, and lifted onto the ground as `Planted` with the ground's normal |
@@ -32,7 +33,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture|distance|distance-bare|far-fine|far-corners|far-mapped>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture|distance|distance-bare|far-fine|far-corners|far-mapped|holes>
 ```
 
 `build/bench.cs` builds a recipe of every step at 513, 1,025, 2,049 and 4,097 points a side and
@@ -79,7 +80,7 @@ recipe with no picture stamp needs no interface at all, as the smallest binding 
 | Units | Meters for every length and height |
 | Axes | Y up and right-handed, the field's columns along X and its rows along Z, about the field's middle |
 | Winding | A tile's triangles run counter-clockwise seen from above, the front faces with Y up and right-handed axes |
-| Heights | A row at a time, each row along X and the rows along Z, the order a physics heightfield takes |
+| Heights | A row at a time, each row along X and the rows along Z, the order a physics heightfield takes, and a field with holes gives `Heightfield.Holes` beside them, a cell between four points a row at a time, which a physics that takes holes takes as it is |
 | Texture coordinates | U along X and V along Z, from nothing at the field's first point to one at its last |
 | Splat layers | RGBA bytes, a texel a point, four materials' weights a layer, linear values and not sRGB color |
 | Distance | A binding picks each tile's step itself, by its distance or by the error on screen it accepts, `LandscapeGeometry.StepError` giving the meters a tile at a step stands off the field's points, and hangs every tile's skirt at the depth `LandscapeGeometry.SkirtDepth` gives for the coarsest step it draws, so tiles at different steps meet with no crack |

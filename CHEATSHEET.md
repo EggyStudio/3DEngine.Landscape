@@ -18,8 +18,10 @@ int Columns { get; }                                     // How many points a ro
 int Rows { get; }                                        // How many rows of points the field has along Z
 float Spacing { get; }                                   // The distance in meters between two points beside each other
 float[] Heights { get; }                                 // The heights in meters, a row at a time, each row along X and the rows along Z
+bool[]? Holes { get; }                                   // Which cells are holes, a cell between four points a row at a time, each row along X and the rows along Z, or nothing where the field has none
 Vector2 Size { get; }                                    // The field's width along X in X and its depth along Z in Y, in meters, from its first point to its last
 float this[int column, int row] { get; set; }            // The height of a point in meters
+bool IsHole(int column, int row);                        // Whether a cell is a hole
 Vector2 Place(int column, int row);                      // Where a point lies across the ground, its X in X and its Z in Y, about the field's middle
 float Height(Vector2 place);                             // The height in meters anywhere over the field, between its points bilinear and past its edge the edge's
 Vector3 Normal(int column, int row);                     // The way up out of the ground at a point, at unit length
@@ -158,6 +160,11 @@ float LeastSteep { get; }                                // The least steepness 
 float MostSteep { get; }                                 // The most steepness it covers whole, a rise over a run
 float SteepBlend { get; }                                // How far in steepness beyond either end it gives way over
 float Weight(float height, float steepness);             // The material's weight before the weights are brought to one, from nothing to one
+
+record Hole                                              // A hole in the ground, the cells whose middles lie within its radius of its place, which no tile draws and no ray meets, for a cave's or a tunnel's mouth an engine fills with a mesh of its own
+Hole(Vector2 place, float radius);                       // A hole of a radius at a place
+Vector2 Place { get; init; }                             // Its middle across the ground, X in X and Z in Y, about the field's middle
+float Radius { get; init; }                              // How far from its middle a cell's middle lies to be a hole, in meters
 
 record PictureStamp                                      // A picture's heights pressed into the field over a rectangle, a mountain or a riverbed an artist drew, read through the engine's ILandscapePictures by its name
 PictureStamp(string picture, Vector2 place, Vector2 size, float height, StampBlend blend = StampBlend.Add, float edge = 0f);  // A stamp of a picture over a rectangle

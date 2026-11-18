@@ -560,3 +560,19 @@ takes 7.47 on one and a whole build 8.6 s where it takes 16.7, and it allocates 
 where it took 4, the two fields a gather reads, in `2026-11-18-item-3-thermal-gather.md`. The bench
 held the exclusive lock for some four minutes after waiting ten with its waiting file standing, past
 the three the review sets from today, and it runs a size at a time from here. The tests pass, 121.
+
+The third of the three in the commit carrying this line, holes, the owner having given no word on
+masks. Its tests came first and failed for want of the types. `Hole` is a step of a place and a
+radius that marks the cells whose middles lie within it, keeping every height, and the field holds
+them as `Heightfield.Holes`, a cell between four points a row at a time or nothing where it has
+none, with `IsHole` and a copy that keeps them. A tile leaves out the triangles of a cell that holds
+a hole's cell, at a coarse step every coarse cell over one, and keeps the shared indices where it
+holds none; a ray passes through a hole; a rebuild that opens or closes a hole reaches its cells'
+corners; and a recipe writes a hole by its kind. Seven tests hold the 25 cells of a hole of 3 m and
+the heights kept, a tile's 25 cells of triangles left out and none over a hole with the others'
+indices shared, a coarse tile leaving out the cell of 8 by 8 over a hole of one cell, a ray falling
+through a hole and meeting the ground beside it, a rebuild's area of the hole's corners, the JSON,
+and the refusals. Two of the tests' numbers were first worked by hand wrong, 28 cells and the rows
+from 58, and read again from the circle before the code was written. The README names `Hole` and
+gives `Heightfield.Holes` beside the heights for an engine's physics. The reading is
+`2026-11-18-item-3-holes.webp`. The tests pass, 128 where there were 121.
