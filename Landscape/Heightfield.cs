@@ -129,6 +129,14 @@ public sealed class Heightfield
     /// </param>
     public float Slope(Vector2 place) => MathF.Acos(Math.Clamp(Normal(place).Y, -1f, 1f));
 
+    /// <summary>A field of the same size holding the same heights, apart from this one.</summary>
+    public Heightfield Copy()
+    {
+        var copy = new Heightfield(Columns, Rows, Spacing);
+        Heights.CopyTo(copy.Heights, 0);
+        return copy;
+    }
+
     /// <summary>Refuses a field's counts and spacing as the arguments they came in.</summary>
     internal static void Check(int columns, int rows, float spacing)
     {

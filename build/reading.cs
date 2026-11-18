@@ -4,12 +4,17 @@
 // module's own tiles lit from one side on a white ground, which Tools' sheet.py lays out with a
 // title and labels. It opens no window and uses no GPU.
 //
-//   dotnet run build/reading.cs -- <folder> <recipe>
+//   dotnet run --no-cache build/reading.cs -- <folder> <recipe>
+//
+// The cached build of a file-based program does not follow a change to the library, so --no-cache
+// builds it again.
 //
 // The recipe is one of the names below. It writes <recipe>-oblique.png, the field seen from its
 // corner of least X and greatest Z at 35 degrees down, and <recipe>-above.png, seen from straight
 // above with X to the right and Z down the picture, each lit by a sun 33 degrees high from the
-// corner of least X and Z, the top left seen from above.
+// corner of least X and Z, the top left seen from above, and <recipe>-contours.png, a line each
+// meter of height from above on white, every fifth darker, which shows the shape a single light
+// hides where it falls along a slope.
 using System.IO.Compression;
 using System.Numerics;
 using Landscape;
@@ -24,16 +29,20 @@ var recipes = new Dictionary<string, Recipe>
         new Stamp(StampShape.Plateau, new(20f, -15f), 25f, 8f, StampBlend.Replace),
         new Stamp(StampShape.Crater, new(55f, 50f), 30f, 6f),
     ]),
+    // Noise with a steep cone over it, before and after thermal erosion at 31 degrees.
+    ["erosion-before"] = Erosion(eroded: false),
+    ["erosion-after"] = Erosion(eroded: true),
 };
 
 if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 {
-    Console.Error.WriteLine($"Usage: dotnet run build/reading.cs -- <folder> <{string.Join('|', recipes.Keys)}>");
+    Console.Error.WriteLine($"Usage: dotnet run --no-cache build/reading.cs -- <folder> <{string.Join('|', recipes.Keys)}>");
     return 2;
 }
 
 Directory.CreateDirectory(args[0]);
-var tiles = LandscapeGeometry.Tiles(recipe.Build());
+var field = recipe.Build();
+var tiles = LandscapeGeometry.Tiles(field);
 var sun = Vector3.Normalize(new Vector3(-0.6f, 0.55f, -0.6f));
 foreach (var (view, yaw, pitch, wide) in new[] { ("oblique", 45f, 35f, 720), ("above", 0f, 90f, 440) })
 {
@@ -42,7 +51,52 @@ foreach (var (view, yaw, pitch, wide) in new[] { ("oblique", 45f, 35f, 720), ("a
     Console.WriteLine(path);
 }
 
+var contours = Path.Combine(args[0], $"{args[1]}-contours.png");
+WritePng(contours, Contours(field, 440, 1f));
+Console.WriteLine(contours);
 return 0;
+
+static Recipe Erosion(bool eroded) => new(129, 129, 1f,
+[
+    new Noise(4, 64f, 6, 12f),
+    new Stamp(StampShape.Cone, new(15f, 10f), 30f, 36f),
+    .. eroded ? new LandscapeStep[] { new ThermalErosion(0.6f, 600) } : [],
+]);
+
+// The field from above, X to the right and Z down, a dark line where a pixel and the one to its
+// right or below it fall between different meters of height, and darker every fifth.
+static (int Width, int Height, byte[] Rgb) Contours(Heightfield field, int width, float interval)
+{
+    var size = field.Size;
+    var height = (int)MathF.Round(width * size.Y / size.X);
+    var levels = new int[width * height];
+    for (var y = 0; y < height; y++)
+    {
+        for (var x = 0; x < width; x++)
+        {
+            var place = new Vector2((x + 0.5f) / width * size.X - size.X / 2f, (y + 0.5f) / height * size.Y - size.Y / 2f);
+            levels[y * width + x] = (int)MathF.Floor(field.Height(place) / interval);
+        }
+    }
+
+    var rgb = new byte[width * height * 3];
+    Array.Fill(rgb, (byte)255);
+    for (var y = 0; y < height; y++)
+    {
+        for (var x = 0; x < width; x++)
+        {
+            var at = y * width + x;
+            var crossed = int.MinValue;
+            if (x + 1 < width && levels[at + 1] != levels[at]) crossed = Math.Max(levels[at + 1], levels[at]);
+            if (y + 1 < height && levels[at + width] != levels[at]) crossed = Math.Max(crossed, Math.Max(levels[at + width], levels[at]));
+            if (crossed == int.MinValue) continue;
+            var shade = (byte)(crossed % 5 == 0 ? 40 : 150);
+            (rgb[at * 3], rgb[at * 3 + 1], rgb[at * 3 + 2]) = (shade, shade, shade);
+        }
+    }
+
+    return (width, height, rgb);
+}
 
 // The tiles' triangles drawn by a depth buffer in an orthographic view turned about up by the yaw
 // and tipped down by the pitch, each pixel lit by its corners' normals, on white.

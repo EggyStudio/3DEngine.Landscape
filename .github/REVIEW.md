@@ -199,3 +199,27 @@ wrapped. `build/reading.cs` draws a recipe's tiles on the CPU, laid out by Tools
 the reading is `2026-11-18-item-3-stamps.webp`. AGENTS.md's devlog row takes its link and its build
 row names the program. The strict build is clean and the tests pass, 25 where there was 1 (dotnet
 test Landscape.Tests).
+
+Item 3's second part in the commit carrying this line. `Noise`, fractal Perlin noise of unit
+gradients a function of the place in meters, so two spacings agree at their shared points;
+`Terrace`, a flat tread and a smooth riser; `Smoothing`, binomial passes; `ThermalErosion`, ground
+slumping to a talus given as a rise over a run; and `LandscapeBuilder`, which keeps the field each
+step left, rebuilds from the first step that differs, and gives a `LandscapeChange` with the
+`LandscapeArea` of points whose bits changed and the tiles whose corners or normals that reaches.
+The library's internals are visible to its tests, which apply a step to a field they made. The
+sheet's contour panel showed the erosion against four neighbors slumping a cone into a square
+pyramid, its diagonal faces at 1.4142 times the talus, and a test of the slope along both axes at
+once failed so before the mend to eight neighbors, the diagonals over the square root of two, which
+holds it to 1.0824, one over the cosine of 22.5 degrees. The tolerances are measured in the test's
+comment and the commit's sentence (N 3.5), and two new hashes are pinned, noise of one seed and the
+five operations together. The reading is `2026-11-18-item-3-erosion.webp`, before, against four and
+against eight. `dotnet run` of a file-based program reused its cached build after the library
+changed and drew the old erosion again, so the README and the program name `--no-cache`. The
+strict build is clean and the tests pass, 47 where there were 25.
+
+**Rule:** on the owner's direction for a stranger's engine, one public shape fits our two engines
+alone. `LandscapeMesh` gives positions with Y up in right-handed axes and triangles
+counter-clockwise from above, which a Z-up or left-handed engine takes by swapping two axes and the
+winding. I propose to keep the shape and state the convention in the README's binding section with
+the swap a Z-up engine makes, rather than give the mesh an axis option, since every engine converts
+once where it builds its mesh.

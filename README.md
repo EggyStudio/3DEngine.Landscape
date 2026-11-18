@@ -13,17 +13,20 @@ implements the interfaces it declares where it binds the module.
 | `Heightfield` | Heights in meters on a grid of points, columns along X and rows along Z with Y up about the field's middle, sampled anywhere for a height, a normal and a slope |
 | `Recipe` | A field's size and its ordered steps, built from flat ground each time |
 | `Stamp` | A shape, `StampShape`, pressed in at a place with a radius and a height and met by a blend, `StampBlend` |
+| `Noise`, `Terrace`, `Smoothing`, `ThermalErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur and ground slumping to its talus |
+| `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
 | `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field and indices |
 
 A recipe gives the same heights to the bit on Linux, Windows and macOS, since its steps use only
 the arithmetic IEEE 754 rounds alike on every system, and a test holds a recipe's heights to a hash
 on each of them. The module gives out arrays, from which an engine builds its own meshes and bodies.
 
-`build/reading.cs` draws a recipe's field on the CPU, oblique and from above, as the pictures of a
-reading, with no window and no GPU:
+`build/reading.cs` draws a recipe's field on the CPU, oblique, from above and in contours, as the
+pictures of a reading, with no window and no GPU. `--no-cache` builds the library again, since a
+file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run build/reading.cs -- <folder> stamps
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after>
 ```
 
 ## Taking it into an engine

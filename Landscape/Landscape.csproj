@@ -14,4 +14,10 @@
         <WarningsAsErrors>$(WarningsAsErrors);CS1591;CS1574</WarningsAsErrors>
     </PropertyGroup>
 
+    <!-- The tests apply a step to a field they made, which a recipe's build does from flat ground
+         alone. -->
+    <ItemGroup>
+        <InternalsVisibleTo Include="Landscape.Tests" />
+    </ItemGroup>
+
 </Project>
