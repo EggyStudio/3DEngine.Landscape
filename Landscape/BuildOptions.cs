@@ -32,6 +32,12 @@ public sealed record BuildOptions
     /// <summary>One thread and no progress, as a build runs where none are given.</summary>
     public static BuildOptions Default { get; } = new();
 
+    // How many rows these options have handed to the threads, which the tests read to know a step
+    // shares its rows.
+    internal long SharedRows => Interlocked.Read(ref _sharedRows);
+
+    private long _sharedRows;
+
     // Runs a body for each row of a stretch, across the threads where there are more than one.
     internal void Rows(int first, int last, Action<int> row)
     {
@@ -41,6 +47,7 @@ public sealed record BuildOptions
             return;
         }
 
+        Interlocked.Add(ref _sharedRows, last - first + 1);
         Parallel.For(first, last + 1, new ParallelOptions { MaxDegreeOfParallelism = Threads }, row);
     }
 }

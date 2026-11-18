@@ -543,3 +543,20 @@ normals, a blur, and at every 16th lit by the map per pixel, the field's own det
 outline alone, drawn by `build/reading.cs`, whose drawing takes a normal a pixel. The README's table
 names the map. Tools' sheet composer moved to its own folder at Tools' head, so the sheet is
 composed by the pinned `modules/Tools/scripts/sheet.py`. The tests pass, 120 where there were 116.
+
+The thermal erosion's gather in the commit carrying this line. A test that one thread and eight give
+the same bits could not fail first, the step running on one thread whatever the options, so the
+failing test is a counted proxy, said as one: the rows a pass hands to the threads, which the
+options count, none before the mend, with the same bits at one thread and at eight held beside it. A
+pass reckons what leaves every point and the excess it is shared by, then each point gathers its
+share from the eight about it in one order and gives up what leaves it, then the moves are added,
+each half sharing its rows among the threads. The sums meet in another order than the moves sent
+from each point did, so the pinned hashes of the five operations and of every step move once, and
+every figure the tests quote reads as it did, the volume 12,565.270 after 1,600 passes, the axis's
+rise 0.80053 and the slope 1.0824 times the talus. The pair,
+`2026-11-18-item-3-thermal-gather.webp`, sent and gathered, differs by one 255th of a channel at
+most, its difference white. At 4,097 a side thermal erosion takes 1.16 s on eight threads where it
+takes 7.47 on one and a whole build 8.6 s where it takes 16.7, and it allocates 12 bytes a point
+where it took 4, the two fields a gather reads, in `2026-11-18-item-3-thermal-gather.md`. The bench
+held the exclusive lock for some four minutes after waiting ten with its waiting file standing, past
+the three the review sets from today, and it runs a size at a time from here. The tests pass, 121.

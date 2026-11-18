@@ -186,5 +186,5 @@ public class OperationTests
     // The hashes of the two recipes' heights, read on Linux at the commit that wrote these tests
     // and held on Windows and macOS by the build workflow.
     private const ulong PinnedNoise = 11577238114687063638ul;
-    private const ulong PinnedTogether = 8965240015134083373ul;
+    private const ulong PinnedTogether = 8588781888222790370ul;
 }

@@ -10,9 +10,11 @@ namespace Landscape;
 /// diagonals. Where it stands higher than a neighbor by more than the talus allows over the
 /// distance between them, a share of half the largest excess leaves it, split among the neighbors
 /// it stands too high over by how far too high it stands over each, as Musgrave, Kolb and Mace gave
-/// the rule in 1989. The moves of a pass are gathered into a second field before any is made, so
-/// the order the points are visited in changes nothing, and what leaves one point reaches another,
-/// so the ground's volume is kept.
+/// the rule in 1989. A pass reckons what leaves every point first and then has each point gather
+/// its share from the neighbors it stands too low beside, in one order of the eight, before any
+/// height changes, so the order the points are visited in changes nothing, its rows run on any
+/// thread with the same bits, and what leaves one point reaches another, so the ground's volume is
+/// kept.
 /// </para>
 /// <para>
 /// The diagonals are compared over the square root of two spacings, since the four neighbors along
@@ -70,44 +72,63 @@ public sealed record ThermalErosion : LandscapeStep
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var straight = Talus * field.Spacing;
         var diagonal = straight * 1.41421356f;
-        var moves = new float[heights.Length];
-        Span<int> beside = stackalloc int[8];
-        Span<float> excess = stackalloc float[8];
+        var (total, leaving, moves) = (new float[heights.Length], new float[heights.Length], new float[heights.Length]);
+        var options = context.Options;
         for (var pass = 0; pass < Passes; pass++)
         {
-            Array.Clear(moves);
-            for (var row = 0; row < rows; row++)
+            // Each point's excess over its talus toward the eight about it, summed, and what leaves
+            // it, a share of half the largest, each point reckoned alone.
+            options.Rows(0, rows - 1, row =>
             {
                 for (var column = 0; column < columns; column++)
                 {
                     var at = row * columns + column;
-                    var (largest, total, count) = (0f, 0f, 0);
+                    var (largest, sum) = (0f, 0f);
+                    for (var z = -1; z <= 1; z++)
+                    {
+                        for (var x = -1; x <= 1; x++)
+                        {
+                            if ((x == 0 && z == 0) || (uint)(column + x) >= (uint)columns || (uint)(row + z) >= (uint)rows) continue;
+                            var over = heights[at] - heights[at + z * columns + x] - (x == 0 || z == 0 ? straight : diagonal);
+                            if (over <= 0f) continue;
+                            sum += over;
+                            largest = MathF.Max(largest, over);
+                        }
+                    }
+
+                    (total[at], leaving[at]) = (sum, sum == 0f ? 0f : Share * largest * 0.5f);
+                }
+            });
+
+            // Each point gathers its share of what leaves each neighbor that stands too high over
+            // it, the neighbors taken in one order, so its sum is the same on any thread, and gives
+            // up what leaves it.
+            options.Rows(0, rows - 1, row =>
+            {
+                for (var column = 0; column < columns; column++)
+                {
+                    var at = row * columns + column;
+                    var change = -leaving[at];
                     for (var z = -1; z <= 1; z++)
                     {
                         for (var x = -1; x <= 1; x++)
                         {
                             if ((x == 0 && z == 0) || (uint)(column + x) >= (uint)columns || (uint)(row + z) >= (uint)rows) continue;
                             var other = at + z * columns + x;
-                            var over = heights[at] - heights[other] - (x == 0 || z == 0 ? straight : diagonal);
-                            beside[count] = other;
-                            excess[count] = over > 0f ? over : 0f;
-                            total += excess[count];
-                            largest = MathF.Max(largest, excess[count]);
-                            count++;
+                            if (leaving[other] == 0f) continue;
+                            var over = heights[other] - heights[at] - (x == 0 || z == 0 ? straight : diagonal);
+                            if (over > 0f) change += leaving[other] * (over / total[other]);
                         }
                     }
 
-                    if (total == 0f) continue;
-                    var leaving = Share * largest * 0.5f;
-                    moves[at] -= leaving;
-                    for (var n = 0; n < count; n++)
-                    {
-                        if (excess[n] > 0f) moves[beside[n]] += leaving * (excess[n] / total);
-                    }
+                    moves[at] = change;
                 }
-            }
+            });
 
-            for (var i = 0; i < heights.Length; i++) heights[i] += moves[i];
+            options.Rows(0, rows - 1, row =>
+            {
+                for (var i = row * columns; i < (row + 1) * columns; i++) heights[i] += moves[i];
+            });
         }
     }
 }

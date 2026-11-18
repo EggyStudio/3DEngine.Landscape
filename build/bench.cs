@@ -55,6 +55,13 @@ foreach (var side in (int[])[513, .. sides])
         Measure(side, steps[k].GetType().Name, () => builder.Rebuild(before), () => builder.Rebuild(upTo), overhead);
     }
 
+    // Thermal erosion again on eight threads, its rows shared, through a builder of its own.
+    var shared = new LandscapeBuilder(new Recipe(side, side, 1f, []), pictures, new BuildOptions(threads: 8));
+    var sharedOverhead = Measure(side, "rebuild overhead, 8 threads", () => { }, () => shared.Rebuild(new Recipe(side, side, 1f, [])), null);
+    var thermal = Array.FindIndex(steps, step => step is ThermalErosion);
+    shared.Rebuild(new Recipe(side, side, 1f, steps[..thermal]));
+    Measure(side, "ThermalErosion, 8 threads", () => shared.Rebuild(new Recipe(side, side, 1f, steps[..thermal])), () => shared.Rebuild(new Recipe(side, side, 1f, steps[..(thermal + 1)])), sharedOverhead);
+
     var field = builder.Field;
     Measure(side, "tiles", () => { }, () => LandscapeGeometry.Tiles(field), null);
     SplatRule[] rules =

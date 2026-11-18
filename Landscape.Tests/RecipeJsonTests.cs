@@ -41,7 +41,7 @@ public class RecipeJsonTests
 
     // The hash of the recipe of every step's heights, read on Linux at the commit that wrote these
     // tests and held on Windows and macOS by the build workflow.
-    private const ulong PinnedEvery = 18439972632216783626ul;
+    private const ulong PinnedEvery = 10450425311743270220ul;
 
     [Fact]
     public void A_Stamp_Is_Written_By_Its_Kind_And_Its_Numbers_In_Camel_Case()

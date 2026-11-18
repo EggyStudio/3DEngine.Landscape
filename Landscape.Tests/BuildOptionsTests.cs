@@ -71,6 +71,21 @@ public class BuildOptionsTests
     }
 
     [Fact]
+    public void Thermal_Erosion_Shares_Its_Rows_And_Gives_The_Bits_Of_One_Thread()
+    {
+        // A count of the rows handed to the threads stands in for the time a test cannot read
+        // steadily, and the bits hold the sharing to what one thread gives.
+        var ground = new Recipe(257, 193, 1f, [new Noise(7, 50f, 6, 5f), new Stamp(StampShape.Cone, Vector2.Zero, 40f, 50f)]).Build();
+        var (one, eight) = (ground.Copy(), ground.Copy());
+        var options = new BuildOptions(threads: 8);
+        new ThermalErosion(0.8f, 20).Apply(one, BuildContext.Alone);
+        new ThermalErosion(0.8f, 20).Apply(eight, new BuildContext(null, options));
+
+        Assert.True(options.SharedRows > 0, "Thermal erosion handed no rows to the threads.");
+        Assert.Equal(one.Heights, eight.Heights);
+    }
+
+    [Fact]
     public void A_Count_Of_Threads_Below_One_Is_Refused()
     {
         Assert.Throws<ArgumentOutOfRangeException>("threads", () => new BuildOptions(threads: 0));

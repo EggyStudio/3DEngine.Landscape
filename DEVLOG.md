@@ -64,6 +64,12 @@ corners' normals, where the ridges between the corners blur into one slope, and 
 the normal map sampled per pixel, where the field's own detail stands on the coarse tiles and the
 outline alone is coarse.
 
+![](.github/assets/readings/2026-11-18-item-3-thermal-gather.webp)
+Noise and a cone after 600 passes of thermal erosion at a talus of 0.6, each point's moves sent to
+its neighbors and each point gathering its share from them, oblique, in contours and lit from above,
+and their difference four times, white throughout since the two differ by one 255th of a channel at
+most.
+
 # The cost of a build by step
 
 An every-step recipe built at 513, 1,025, 2,049 and 4,097 points a side, a step at a time through a
@@ -151,6 +157,29 @@ its field of 67 MB read afresh from memory. A block at a time, it costs the same
 37 hundredths less than drawn anywhere at 4,097 in the same round. The second round's B was stopped
 to free the lock for a session waiting behind it.
 
+# Thermal erosion gathered across threads
+
+Thermal erosion's time and bytes a point, 20 passes, at 1,025 and 4,097 points a side, on one
+thread and on eight, the fastest of three runs each after a first pass at 513 that is not
+reported, under the machine's exclusive lock (`dotnet run -c Release --no-cache build/bench.cs --
+<numbers.json> 1025 4097`), with the machine carrying a load of some 24 from other sessions' work.
+
+| Side | Stage | ms | ns a point | bytes a point |
+|---:|---|---:|---:|---:|
+| 1,025 | thermal erosion, one thread | 473 | 450.0 | 12.00 |
+| 1,025 | thermal erosion, eight threads | 74 | 70.1 | 12.11 |
+| 1,025 | whole build, one thread | 1,172 | 1,116.0 | 20.02 |
+| 1,025 | whole build, eight threads | 549 | 522.7 | 20.14 |
+| 4,097 | thermal erosion, one thread | 7,465 | 444.7 | 12.00 |
+| 4,097 | thermal erosion, eight threads | 1,160 | 69.1 | 12.01 |
+| 4,097 | whole build, one thread | 16,690 | 994.3 | 20.01 |
+| 4,097 | whole build, eight threads | 8,605 | 512.6 | 20.02 |
+
+Gathered, a pass reckons what leaves every point into a field, the excess it is shared by into a
+second and the moves into a third, 12 bytes a point where the moves alone took 4, so a whole build
+allocates 20 bytes a point where it allocated 12. On eight threads thermal erosion runs 6.4 times as
+fast at 4,097 a side and a whole build twice as fast, the droplets on one thread taking the rest.
+
 # A build across threads
 
 An every-step recipe built at 1,025 and 4,097 points a side on one thread and on eight, the
@@ -194,6 +223,8 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `adc1b7d` A normal map gives the field's normal at every point as a texture, written again over a
+  change, so a tile drawn far off at a coarse step is lit by the field's own detail.
 - `9c9e44c` A build shares the rows of every step whose points are reckoned alone among the threads
   its options allow, the same bits at any count, and reports each step it applies.
 - `f1cf785` The droplets run a block of the field at a time in turns, so at 4,097 points a side they
