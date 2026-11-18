@@ -52,6 +52,9 @@ var recipes = new Dictionary<string, Recipe>
         new Hole(new(-35f, 25f), 6f),
         new Hole(new(60f, -50f), 10f),
     ]),
+    // Rough noise masked by a ramp of weights rising across the field, the noise whole at one
+    // side and nothing at the other.
+    ["masked"] = new(129, 129, 1f, [new Masked(new Noise(5, 24f, 5, 6f), "ramp", Vector2.Zero, new(128f, 128f))]),
     ["far-fine"] = Distance(),
     ["far-corners"] = Distance(),
     ["far-mapped"] = Distance(),
@@ -376,6 +379,7 @@ sealed class DrawnPictures : ILandscapePictures
 {
     public HeightPicture? Heights(string name)
     {
+        if (name == "ramp") return new HeightPicture(2, 2, [0f, 1f, 0f, 1f]);
         if (name != "ridge") return null;
         var shares = new float[64 * 32];
         for (var z = 0; z < 32; z++)

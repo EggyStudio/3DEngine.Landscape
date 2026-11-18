@@ -161,6 +161,13 @@ float MostSteep { get; }                                 // The most steepness i
 float SteepBlend { get; }                                // How far in steepness beyond either end it gives way over
 float Weight(float height, float steepness);             // The material's weight before the weights are brought to one, from nothing to one
 
+record Masked                                            // A step scaled by a picture of weights over a rectangle, so it acts on part of the field, the weights read through the engine's ILandscapePictures by the picture's name
+Masked(LandscapeStep step, string mask, Vector2 place, Vector2 size);  // A step masked by a picture over a rectangle
+LandscapeStep Step { get; init; }                        // The step the weights scale
+string Mask { get; init; }                               // The picture's name, its shares the weights, which the engine answers for
+Vector2 Place { get; init; }                             // The rectangle's middle across the ground, X in X and Z in Y
+Vector2 Size { get; init; }                              // The rectangle's width along X in X and its depth along Z in Y, in meters
+
 record Hole                                              // A hole in the ground, the cells whose middles lie within its radius of its place, which no tile draws and no ray meets, for a cave's or a tunnel's mouth an engine fills with a mesh of its own
 Hole(Vector2 place, float radius);                       // A hole of a radius at a place
 Vector2 Place { get; init; }                             // Its middle across the ground, X in X and Z in Y, about the field's middle

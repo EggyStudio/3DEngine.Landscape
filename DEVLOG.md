@@ -75,6 +75,11 @@ Noise and a cone with a hole of 6 m in the cone's flank and one of 10 m on the p
 ground showing through where no tile draws a cell, oblique and lit from above, and the contours from
 above running through both since a hole keeps the heights the steps left.
 
+![](.github/assets/readings/2026-11-18-item-3-masked.webp)
+Noise of 6 m masked by a picture of weights rising from nothing at the least X to one at the
+greatest across 128 by 128 points, the ground flat at one side, the noise whole at the other and a
+share of it between, oblique, lit from above and in contours.
+
 # The cost of a build by step
 
 An every-step recipe built at 513, 1,025, 2,049 and 4,097 points a side, a step at a time through a
@@ -228,6 +233,8 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `e4894ca` The review holds a handoff of what the module holds, what waits on the owner and what to
+  read first, and the tests take the module checks of the latest Tools.
 - `c0ed588` A hole marks the cells within its radius, which no tile draws and no ray meets, for a
   cave's or a tunnel's mouth an engine fills, the heights kept and the cells given to its physics.
 - `6184a79` Thermal erosion gathers each point's share from its neighbors in one order, so its rows

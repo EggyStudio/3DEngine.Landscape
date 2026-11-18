@@ -592,3 +592,13 @@ Replies, NORM.md's N 7.9 on the lock (an exclusive hold of three minutes at most
 then README.md's Binding it in your engine and CHEATSHEET.md, and runs `python3 -I
 modules/Tools/scripts/pin.py` before a commit that moves the pin and `commitcheck.py . --staged
 --message=<file>` before every commit.
+
+A mask as plain data in the commit carrying this line, the first hourly step. Its tests came first
+and failed for want of the type. `Masked` wraps a step with the name of a picture of weights read
+through `ILandscapePictures` and a rectangle, applies the step to a copy and takes each point's
+change times its weight, the picture's share there and nothing outside, a weight of one or nothing
+giving the step's height or the ground's to the bit, a hole the step opens kept where the weight at
+its cell's middle is a half or more, and it is written as JSON by its kind with its step inside.
+Three tests hold the weights of nothing, a half and one and the ground outside, the JSON, and the
+refusals. No stroke and no editor; those stay the owner's. The reading is
+`2026-11-18-item-3-masked.webp`. The tests pass, 131.

@@ -18,6 +18,7 @@ namespace Landscape;
 [System.Text.Json.Serialization.JsonDerivedType(typeof(ThermalErosion), "thermalErosion")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(HydraulicErosion), "hydraulicErosion")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Hole), "hole")]
+[System.Text.Json.Serialization.JsonDerivedType(typeof(Masked), "masked")]
 public abstract record LandscapeStep
 {
     /// <summary>For the module's steps alone, which are the only ones a recipe builds.</summary>
