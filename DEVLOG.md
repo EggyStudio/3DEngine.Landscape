@@ -228,6 +228,8 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `c0ed588` A hole marks the cells within its radius, which no tile draws and no ray meets, for a
+  cave's or a tunnel's mouth an engine fills, the heights kept and the cells given to its physics.
 - `6184a79` Thermal erosion gathers each point's share from its neighbors in one order, so its rows
   run on any thread with the same bits and it runs 6.4 times as fast on eight at 4,097 points a
   side.

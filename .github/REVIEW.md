@@ -576,3 +576,19 @@ and the refusals. Two of the tests' numbers were first worked by hand wrong, 28 
 from 58, and read again from the circle before the code was written. The README names `Hole` and
 gives `Heightfield.Holes` beside the heights for an engine's physics. The reading is
 `2026-11-18-item-3-holes.webp`. The tests pass, 128 where there were 121.
+
+**Handoff.** The module stands idle at the commit carrying this line, Tools pinned at `7704c84` by
+`pin.py`, whose changed fact the test already holds, 128 tests passing. It holds a `Heightfield`
+built from a `Recipe` of steps, stamps, picture stamps through `ILandscapePictures`, noise,
+terraces, smoothing, thermal erosion gathered across threads, hydraulic erosion by droplets in
+blocks, and holes, rebuilt from the first changed step by `LandscapeBuilder` with `BuildOptions`,
+written and read as JSON; tiles with bounds, steps, skirts and a step's error; a ray onto the drawn
+ground; a splat map and a normal map, each written again over a change; and placement by height,
+steepness and a density map. Open with the owner: masks as plain data, strokes recorded as steps,
+and the per-point erosion filter of the owner's Shadertoy pointer, whose code is under MPL-2.0 and a
+port of which would be a derived file marked so, its cosine, sine and power the module's own for the
+pinned hashes. A fresh session reads AGENTS.md, then REVIEW.md's head, its items and the last few
+Replies, NORM.md's N 7.9 on the lock (an exclusive hold of three minutes at most, one size a run),
+then README.md's Binding it in your engine and CHEATSHEET.md, and runs `python3 -I
+modules/Tools/scripts/pin.py` before a commit that moves the pin and `commitcheck.py . --staged
+--message=<file>` before every commit.
