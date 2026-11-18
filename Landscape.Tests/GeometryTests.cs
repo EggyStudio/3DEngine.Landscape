@@ -76,6 +76,27 @@ public class GeometryTests
     }
 
     [Fact]
+    public void A_Fields_Tiles_Allocate_Their_Corners_And_One_Index_Array_A_Size()
+    {
+        // Every whole tile's triangles join its corners in the same order, so the tiles of one size
+        // share one array of indices and a field's tiles allocate their corners' positions,
+        // normals and texture coordinates, 32 bytes a point, and little else.
+        var field = new Heightfield(1025, 1025, 1f);
+        LandscapeGeometry.Tiles(field);
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var tiles = LandscapeGeometry.Tiles(field);
+        var bytes = (double)(GC.GetAllocatedBytesForCurrentThread() - before) / (1025 * 1025);
+
+        Assert.True(bytes <= MostBytesAPoint, $"The tiles allocated {bytes:F2} bytes a point.");
+        Assert.Same(tiles[0].Indices, tiles[^1].Indices);
+    }
+
+    // The tiles of 1,025 by 1,025 points allocated 56.94 bytes a point with an index array a tile
+    // (dotnet run -c Release --no-cache build/bench.cs), 24 of them indices, and 32.99 with one
+    // array a size, so a bound of 34 holds the share.
+    private const double MostBytesAPoint = 34;
+
+    [Fact]
     public void A_Tile_Refuses_What_The_Field_Does_Not_Have()
     {
         var field = new Heightfield(129, 129, 1f);

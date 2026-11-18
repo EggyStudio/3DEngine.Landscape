@@ -1,4 +1,4 @@
-# Landscape cheat sheet
+# Landscape cheatsheet
 
 Every public type of `3DEngine.Landscape` with its members, a line each of its declaration and the
 first sentence of its summary. A field starts as a `Recipe` of steps, is built and built again by a

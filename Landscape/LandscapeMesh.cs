@@ -7,6 +7,7 @@ namespace Landscape;
 /// builds a mesh of.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Neighboring tiles share the corners of their common edge, each tile holding its own copy, and
 /// give them the same positions and normals, since both are the field's at that point, so the tiles
 /// meet with no crack and no seam of light. The texture coordinates run over the whole field rather
@@ -14,6 +15,11 @@ namespace Landscape;
 /// winding is counter-clockwise seen from above, the front faces of an engine with Y up and
 /// right-handed axes, and an engine that culls the other side takes each triangle's corners in the
 /// other order.
+/// </para>
+/// <para>
+/// The indices of every tile of one width and depth are one array, shared among the tiles of every
+/// field the module cuts, so an engine reads them and never writes into them.
+/// </para>
 /// </remarks>
 public sealed record LandscapeMesh
 {

@@ -82,6 +82,18 @@ public static class LandscapeGeometry
             }
         }
 
+        return new LandscapeMesh(column, row, positions, normals, uvs, Indices(width, depth));
+    }
+
+    // One array of indices for every tile of a width and a depth in corners, made once and shared,
+    // since every such tile joins its corners in the same order and a field of 4,097 points a side
+    // otherwise allocated 4,096 copies of it, 24 bytes a point of its tiles' 57.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<(int Width, int Depth), uint[]> SharedIndices = new();
+
+    private static uint[] Indices(int width, int depth) => SharedIndices.GetOrAdd((width, depth), static size =>
+    {
+        var (width, depth) = size;
+
         // Each cell's two triangles, its near corners first. Seen from above with X to the right, Z
         // runs down the picture, and near-left, far-left, near-right turns counter-clockwise.
         var indices = new uint[(width - 1) * (depth - 1) * 6];
@@ -103,6 +115,6 @@ public static class LandscapeGeometry
             }
         }
 
-        return new LandscapeMesh(column, row, positions, normals, uvs, indices);
-    }
+        return indices;
+    });
 }

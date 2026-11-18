@@ -49,6 +49,20 @@ public sealed class ModuleTests
     }
 
     [Fact]
+    public void No_Tracked_Text_Names_An_Engine()
+    {
+        var fault = ModuleChecks.EngineNameInTextFault(Root);
+        Assert.True(fault is null, fault);
+    }
+
+    [Fact]
+    public void The_Readme_Opens_With_Its_Link_Row()
+    {
+        var fault = ModuleChecks.LinkRowFault(Assembly.Load(Library), Readme);
+        Assert.True(fault is null, fault);
+    }
+
+    [Fact]
     public void The_Readmes_Binding_Block_Stands_Word_For_Word_In_The_Host()
     {
         var fault = ModuleChecks.BindingBlock(Readme, File.ReadAllText(Path.Combine(Root, Host)));

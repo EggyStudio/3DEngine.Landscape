@@ -1,13 +1,12 @@
+[Devlog](https://github.com/EggyStudio/Landscape/blob/main/DEVLOG.md) [Cheatsheet](https://github.com/EggyStudio/Landscape/blob/main/CHEATSHEET.md)
+
 # Landscape
 
-[Devlog](DEVLOG.md) [Cheat sheet](CHEATSHEET.md)
-
-Landscape is a library both engines, 3DEngine and BevyCSharp, take as a git submodule, for a
-heightfield whose recipe is an ordered list of stamps and procedural operations applied again on
-each change, erosion among them, with vegetation placed through Vegetation by slope, height and a
-density map, and a splat map over a few materials. It references no engine, and an engine whose
-recipes stamp pictures implements the one interface it declares, `ILandscapePictures`, where it
-binds the module.
+Landscape is a library any engine on .NET takes as a git submodule, for a heightfield whose recipe
+is an ordered list of stamps and procedural operations applied again on each change, erosion among
+them, with vegetation placed through Vegetation by slope, height and a density map, and a splat map
+over a few materials. It references no engine, and an engine whose recipes stamp pictures implements
+the one interface it declares, `ILandscapePictures`, where it binds the module.
 
 ## What it holds
 
@@ -33,6 +32,13 @@ file-based program's cached build does not follow a change to a project it refer
 
 ```bash
 dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture>
+```
+
+`build/bench.cs` builds a recipe of every step at 513, 1,025, 2,049 and 4,097 points a side and
+prints each stage's time and bytes a point, a timing to run alone on the machine:
+
+```bash
+dotnet run -c Release --no-cache build/bench.cs -- <numbers.json>
 ```
 
 ## Taking it into an engine
@@ -62,9 +68,8 @@ The module needs nothing of an engine but the pictures a `PictureStamp` names. I
 interface, `ILandscapePictures`, through which the engine gives a picture's heights by its name as
 a `HeightPicture`, read from its own files, and it calls no renderer, window, scheduler or file
 system. What it gives out is arrays of .NET's own types and `System.Numerics`' vectors, which an
-engine turns into its own meshes, textures and bodies. The two engines above bind it this way, and
-any other engine on .NET 10 binds it the same. A recipe with no picture stamp needs no interface at
-all, as the smallest binding below shows.
+engine turns into its own meshes, textures and bodies, and any engine on .NET 10 binds it so. A
+recipe with no picture stamp needs no interface at all, as the smallest binding below shows.
 
 ### Conventions
 

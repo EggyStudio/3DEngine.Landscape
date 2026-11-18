@@ -1,12 +1,11 @@
 # Landscape
 
-Landscape is a library both engines, 3DEngine and BevyCSharp, take as a git submodule, for a
-heightfield whose recipe is an ordered list of stamps and procedural operations applied again on
-each change, erosion among them, with vegetation placed through Vegetation by slope, height and a
-density map, and a splat map over a few materials. It references no engine, no engine's package and
-no engine's bridge (NORM.md, N 2.1). What it needs of a renderer, a world, a scheduler or a file
-system it takes through an interface it declares, which each engine implements where it binds the
-module.
+Landscape is a library any engine on .NET takes as a git submodule, for a heightfield whose recipe
+is an ordered list of stamps and procedural operations applied again on each change, erosion among
+them, with vegetation placed through Vegetation by slope, height and a density map, and a splat map
+over a few materials. It references no engine, no engine's package and no engine's bridge (NORM.md,
+N 2.1). What it needs of a renderer, a world, a scheduler or a file system it takes through an
+interface it declares, which each engine implements where it binds the module.
 
 ## Documents
 
@@ -38,7 +37,7 @@ runs the tests on Linux, Windows and macOS on every push (NORM.md, N 6.1 and N 6
 | `Landscape` | The library, `Landscape.csproj` |
 | `Landscape.Tests` | The xunit tests of the library |
 | `modules` | The Tools module as a git submodule, `modules/Tools`, whose checks of a module the tests take and the library does not |
-| `build` | The version, `version.txt`'s major and minor set by hand and `version.sh`, which prints it with the patch counted from the history, and `reading.cs`, which draws a recipe's field on the CPU for a reading |
+| `build` | The version, `version.txt`'s major and minor set by hand and `version.sh`, which prints it with the patch counted from the history, `reading.cs`, which draws a recipe's field on the CPU for a reading, and `bench.cs`, which times a recipe of every step at four sizes |
 
 ## Conventions
 

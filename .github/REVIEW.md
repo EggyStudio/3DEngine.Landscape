@@ -351,7 +351,7 @@ the file of one stamp as written, six refusals by name, and the picture stamp's 
 missing picture and rebuild. The reading is `2026-11-18-item-3-picture.webp`. The strict build is
 clean and the tests pass, 87 where there were 75.
 
-The cheat sheet in the commit carrying this line. Tools moves to `3720852`, `ModuleTests` holds
+The cheatsheet in the commit carrying this line. Tools moves to `3720852`, `ModuleTests` holds
 the fifth fact, and CHEATSHEET.md is written by `Cheatsheet.Write` with `CHEATSHEET_WRITE=1`
 under a short opening by hand, linked from the README's top line beside the devlog and named in
 AGENTS.md's documents table with its command. It lists 25 types and 149 members. The first writing
@@ -359,3 +359,26 @@ showed the four positional records, `LandscapeChange`, `LandscapeArea`, `Planted
 `LandscapeMesh`, with constructors of no summary, since a record's primary constructor takes none
 of its own, so each is a record with a constructor and properties written out and a summary each,
 the same members and equality. The tests pass, 88.
+
+The cost reading in the commit carrying this line. `build/bench.cs` builds a recipe of every step at
+513, 1,025, 2,049 and 4,097 points a side, each step through a builder's rebuild less its own
+overhead, each stage the fastest of three runs after a first pass at 513 that is not reported, under
+the exclusive lock with its waiting file, its runs of under three minutes each. Every stage
+allocates the same bytes a point at every size, and the most were the tiles', 57 bytes a point, 24
+of them an index array a tile though every whole tile's indices are the same, so a bound of 34
+failed at 56.94 first and the tiles of one size share one array of indices, 32.99 bytes a point
+after and 957 MB at 4,097 a side falling to 554, the mesh's remarks saying an engine reads the
+shared indices and never writes them. Hydraulic erosion's time a point rises at 4,097, 583 ns where
+it is 400 to 434 below, a field of 67 MB that no cache holds, and the noise and the splat map grow
+cheaper a point as the bench widens the noise with the field, its lattice's cells and the materials
+repeating across more neighbors. A first run's smaller fields ran before the runtime had optimized
+the code, which the warm-up pass removed for the splat map and not for the noise, and tiered
+compilation turned off slowed the droplets, so the bench keeps it on. The reading is
+`2026-11-18-item-3-bench.webp` with its numbers in `2026-11-18-item-3-bench.md`, and AGENTS.md's
+build row and the README name the bench. In the same commit the owner's rules of today. The two
+lines naming an engine by its name and the five more that spoke of the two engines, seven in all,
+read 0 after in both searches, the build's and the props' comments, the README's and AGENTS.md's
+openings and the binding section. The README opens with its link row above the title, and cheatsheet
+is one word in the row and the page's title. Tools moves to `75d77f2` with its facts of the link row
+and of the tracked text naming no engine. DEVLOG.md holds 2 days, 7 pictures and 2 items done,
+CHEATSHEET.md is regenerated, and the tests pass, 91 where there were 88.

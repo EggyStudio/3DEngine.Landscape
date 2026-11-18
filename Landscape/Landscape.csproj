@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <!-- The library both engines reference from their own projects, which knows no engine
-         (N 2.1). -->
+    <!-- The library an engine references from its own project, which knows no engine (N 2.1). -->
     <!-- The assembly and the package are 3DEngine.Landscape and the namespace Landscape alone, so
          code names a type as Landscape.Heightfield whichever assembly name a package gives. -->
     <PropertyGroup>
