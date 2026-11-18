@@ -448,3 +448,16 @@ it 3 units of the last place apart, so it reads to a ten-thousandth. The README'
 names the ray and `RayHit`. The cheatsheet's writer prints a default of infinity as `Infinityf`,
 which C# does not read, in the ray's reach and in the two rules' ranges, a finding for Tools. The
 tests pass, 107 where there were 102.
+
+The third of the three in the commit carrying this line, a splat map weighed again over a change
+alone. Its tests came first and failed for want of the member. `SplatMap` keeps its rules, and
+`SplatMap.Update` weighs again the points of a rebuild's changed area and those beside it, whose
+steepness reads the changed points, writes the layers in place and gives the rectangle of texels it
+weighed, cut to the field. The README's binding block gives the engine that rectangle of each layer
+by a fourth call where it made the whole map again, the host in the tests copying the rectangle a
+row at a time as a texture's region is uploaded, and the host bound through the edit holds the same
+layer as one bound to the edited recipe from nothing, so the update reaches every texel the change
+does. Three tests hold an update over a moved cone equal to a whole map of the new field to the byte
+and the weight, the texels outside the grown rectangle as they were, and an area at the edge cut to
+the field with another field's size and an area past the field refused. The tests pass, 110 where
+there were 107.

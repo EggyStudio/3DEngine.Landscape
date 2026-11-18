@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Landscape.Tests;
 
-// The README's smallest binding run against a host with no engine, whose three calls keep what they
+// The README's smallest binding run against a host with no engine, whose four calls keep what they
 // are given, so the build proves the guide a stranger binds the module by, ModuleTests holding the
 // README's block to the lines between the markers.
 public class BindingTests
@@ -62,8 +62,8 @@ public class BindingTests
             engine.SplatLayer(layer, splat.Columns, splat.Rows, splat.Layers[layer]);
         engine.CollisionHeights(field.Columns, field.Rows, field.Spacing, field.Heights);
 
-        // After an edit, the tiles the change reached are made again and the rest kept, and
-        // the splat layers and the heights, which are the whole field's, are given again.
+        // After an edit, the tiles the change reached are made again and the rest kept, the
+        // splat layers' texels it reached are weighed again and given, and so are the heights.
         var change = builder.Rebuild(edited);
         field = builder.Field;
         if (change.Changed is { } area)
@@ -74,16 +74,19 @@ public class BindingTests
                 engine.MeshTile(column, row, tile.Positions, tile.Normals, tile.Uvs, tile.Indices);
             }
 
-            splat = SplatMap.Of(field, rules);
-            for (var layer = 0; layer < splat.Layers.Count; layer++)
-                engine.SplatLayer(layer, splat.Columns, splat.Rows, splat.Layers[layer]);
+            if (splat.Update(field, area) is { } weighed)
+            {
+                for (var layer = 0; layer < splat.Layers.Count; layer++)
+                    engine.SplatRegion(layer, weighed, splat.Columns, splat.Layers[layer]);
+            }
+
             engine.CollisionHeights(field.Columns, field.Rows, field.Spacing, field.Heights);
         }
         // The end marker.
     }
 
-    // An engine's three calls, each keeping a copy of what it was given as a renderer and a physics
-    // would keep their own.
+    // An engine's calls, each keeping a copy of what it was given as a renderer and a physics would
+    // keep their own.
     private sealed class Host
     {
         public Dictionary<(int Column, int Row), (Vector3[] Positions, Vector3[] Normals, Vector2[] Uvs, uint[] Indices)> Tiles { get; } = [];
@@ -104,6 +107,16 @@ public class BindingTests
         {
             Assert.Equal(width * height * 4, rgba.Length);
             Layers[layer] = [.. rgba];
+        }
+
+        public void SplatRegion(int layer, LandscapeArea area, int columns, byte[] rgba)
+        {
+            // The rectangle's texels a row at a time, as a texture's region is uploaded.
+            for (var row = area.FirstRow; row <= area.LastRow; row++)
+            {
+                var from = (row * columns + area.FirstColumn) * 4;
+                Array.Copy(rgba, from, Layers[layer], from, (area.LastColumn - area.FirstColumn + 1) * 4);
+            }
         }
 
         public void CollisionHeights(int columns, int rows, float spacing, float[] heights)

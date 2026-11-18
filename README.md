@@ -99,10 +99,10 @@ its rows for V.
 
 ### The smallest binding
 
-The engine's side is three calls of its own, one making a tile's mesh, one uploading a splat layer
-as a texture and one giving the heights to its physics, here on an object named `engine`. The
-module builds the recipe, cuts the field into tiles and, after an edit, says which tiles the edit
-reached.
+The engine's side is four calls of its own, one making a tile's mesh, one uploading a splat layer
+as a texture and one a rectangle of it, and one giving the heights to its physics, here on an
+object named `engine`. The module builds the recipe, cuts the field into tiles and, after an edit,
+says which tiles and which texels the edit reached.
 
 ```csharp
 var builder = new LandscapeBuilder(recipe);
@@ -114,8 +114,8 @@ for (var layer = 0; layer < splat.Layers.Count; layer++)
     engine.SplatLayer(layer, splat.Columns, splat.Rows, splat.Layers[layer]);
 engine.CollisionHeights(field.Columns, field.Rows, field.Spacing, field.Heights);
 
-// After an edit, the tiles the change reached are made again and the rest kept, and
-// the splat layers and the heights, which are the whole field's, are given again.
+// After an edit, the tiles the change reached are made again and the rest kept, the
+// splat layers' texels it reached are weighed again and given, and so are the heights.
 var change = builder.Rebuild(edited);
 field = builder.Field;
 if (change.Changed is { } area)
@@ -126,9 +126,12 @@ if (change.Changed is { } area)
         engine.MeshTile(column, row, tile.Positions, tile.Normals, tile.Uvs, tile.Indices);
     }
 
-    splat = SplatMap.Of(field, rules);
-    for (var layer = 0; layer < splat.Layers.Count; layer++)
-        engine.SplatLayer(layer, splat.Columns, splat.Rows, splat.Layers[layer]);
+    if (splat.Update(field, area) is { } weighed)
+    {
+        for (var layer = 0; layer < splat.Layers.Count; layer++)
+            engine.SplatRegion(layer, weighed, splat.Columns, splat.Layers[layer]);
+    }
+
     engine.CollisionHeights(field.Columns, field.Rows, field.Spacing, field.Heights);
 }
 ```

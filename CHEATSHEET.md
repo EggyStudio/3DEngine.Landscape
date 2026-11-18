@@ -141,6 +141,7 @@ int Columns { get; }                                     // How many points a ro
 int Rows { get; }                                        // How many rows of points there are along Z, the layers' height in texels
 IReadOnlyList<string> Materials { get; }                 // The materials' names in the order of the rules, four to a layer
 IReadOnlyList<byte[]> Layers { get; }                    // The layers, four bytes a texel in red, green, blue and alpha, four materials each
+LandscapeArea? Update(Heightfield field, LandscapeArea area);  // Weighs the points of a changed area again and those beside it, the map holding then what a whole map of the field holds
 SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules);  // Makes a field's splat map by its materials' rules
 float Weight(int material, int column, int row);         // A material's weight at a point, from nothing to one, the materials' summing to one
 

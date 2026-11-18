@@ -27,24 +27,30 @@ public sealed class SplatMap
     public const int MostMaterials = 8;
 
     private readonly float[] _weights;
+    private readonly SplatRule[] _rules;
 
     private SplatMap(Heightfield field, IReadOnlyList<SplatRule> rules)
     {
-        (Columns, Rows, Materials) = (field.Columns, field.Rows, [.. rules.Select(rule => rule.Material)]);
-        var count = rules.Count;
-        _weights = new float[field.Heights.Length * count];
-        var layers = (count + 3) / 4;
-        Layers = [.. Enumerable.Range(0, layers).Select(_ => new byte[field.Heights.Length * 4])];
+        (Columns, Rows, Materials, _rules) = (field.Columns, field.Rows, [.. rules.Select(rule => rule.Material)], [.. rules]);
+        _weights = new float[field.Heights.Length * rules.Count];
+        Layers = [.. Enumerable.Range(0, (rules.Count + 3) / 4).Select(_ => new byte[field.Heights.Length * 4])];
+        Weigh(field, 0, 0, Columns - 1, Rows - 1);
+    }
+
+    // The weights and the bytes of the points of a rectangle, each point weighed alone.
+    private void Weigh(Heightfield field, int firstColumn, int firstRow, int lastColumn, int lastRow)
+    {
+        var count = _rules.Length;
         Span<float> remainders = stackalloc float[count];
         Span<int> bytes = stackalloc int[count];
-        for (var row = 0; row < Rows; row++)
+        for (var row = firstRow; row <= lastRow; row++)
         {
-            for (var column = 0; column < Columns; column++)
+            for (var column = firstColumn; column <= lastColumn; column++)
             {
                 var point = row * Columns + column;
                 var (height, steepness) = (field[column, row], field.Steepness(column, row));
                 var total = 0f;
-                for (var m = 0; m < count; m++) total += _weights[point * count + m] = rules[m].Weight(height, steepness);
+                for (var m = 0; m < count; m++) total += _weights[point * count + m] = _rules[m].Weight(height, steepness);
 
                 // Where no rule reaches, the first material, the ground's own, covers the point.
                 if (total == 0f) (_weights[point * count], total) = (1f, 1f);
@@ -70,9 +76,45 @@ public sealed class SplatMap
                     remainders[largest] = -1f;
                 }
 
+                // A last layer of fewer than four holds nothing in the rest, which a point weighed
+                // again keeps.
                 for (var m = 0; m < count; m++) Layers[m / 4][point * 4 + m % 4] = (byte)bytes[m];
             }
         }
+    }
+
+    /// <summary>
+    /// Weighs the points of a changed area again and those beside it, the map holding then what a
+    /// whole map of the field holds.
+    /// </summary>
+    /// <param name="field">The field the map is of, as it stands after the change.</param>
+    /// <param name="area">
+    /// The points whose heights changed, as a rebuild's <see cref="LandscapeChange.Changed"/> gives
+    /// them.
+    /// </param>
+    /// <returns>
+    /// The rectangle of texels weighed again, which an engine uploads of each layer.
+    /// </returns>
+    /// <exception cref="ArgumentException">The field is not of the map's size.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The area reaches past the field.</exception>
+    /// <remarks>
+    /// A point's steepness reads the points beside it, so a changed height changes the weights of
+    /// the points beside it as well, and the area is grown by a point each way, cut to the field.
+    /// The layers are written in place, so an engine that keeps them uploads the rectangle the
+    /// update gives.
+    /// </remarks>
+    public LandscapeArea? Update(Heightfield field, LandscapeArea area)
+    {
+        ArgumentNullException.ThrowIfNull(field);
+        if (field.Columns != Columns || field.Rows != Rows)
+            throw new ArgumentException($"The splat map is of {Columns} by {Rows} points and the field of {field.Columns} by {field.Rows}.", nameof(field));
+        if (area.FirstColumn < 0 || area.FirstRow < 0 || area.LastColumn >= Columns || area.LastRow >= Rows || area.FirstColumn > area.LastColumn || area.FirstRow > area.LastRow)
+            throw new ArgumentOutOfRangeException(nameof(area), area, "The area lies within the field, its first point at or before its last.");
+        var grown = new LandscapeArea(
+            Math.Max(area.FirstColumn - 1, 0), Math.Max(area.FirstRow - 1, 0),
+            Math.Min(area.LastColumn + 1, Columns - 1), Math.Min(area.LastRow + 1, Rows - 1));
+        Weigh(field, grown.FirstColumn, grown.FirstRow, grown.LastColumn, grown.LastRow);
+        return grown;
     }
 
     /// <summary>How many points a row has along X, the layers' width in texels.</summary>
