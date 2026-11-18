@@ -65,7 +65,7 @@ public sealed record ThermalErosion : LandscapeStep
         init => field = value is > 0f and <= 1f ? value : throw new ArgumentOutOfRangeException(nameof(Share), value, "A share is above nothing and at most one.");
     }
 
-    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
+    internal override void Apply(Heightfield field, BuildContext context)
     {
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var straight = Talus * field.Spacing;

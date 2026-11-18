@@ -49,9 +49,12 @@ public sealed record Terrace : LandscapeStep
         return (step + rise) * Height;
     }
 
-    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
+    internal override void Apply(Heightfield field, BuildContext context)
     {
-        for (var i = 0; i < field.Heights.Length; i++) field.Heights[i] = Of(field.Heights[i]);
+        context.Options.Rows(0, field.Rows - 1, row =>
+        {
+            for (var i = row * field.Columns; i < (row + 1) * field.Columns; i++) field.Heights[i] = Of(field.Heights[i]);
+        });
     }
 
     private static float Smooth(float t) => t * t * (3f - 2f * t);

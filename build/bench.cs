@@ -66,6 +66,7 @@ foreach (var side in (int[])[513, .. sides])
     ];
     Measure(side, "splat map", () => { }, () => SplatMap.Of(field, rules), null);
     Measure(side, "whole build", () => { }, () => new Recipe(side, side, 1f, steps).Build(pictures), null);
+    Measure(side, "whole build, 8 threads", () => { }, () => new Recipe(side, side, 1f, steps).Build(pictures, new BuildOptions(threads: 8)), null);
     warming = false;
 }
 

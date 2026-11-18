@@ -26,8 +26,8 @@ public abstract record LandscapeStep
     /// Changes the field's heights as the step says, reading the pictures a picture stamp names
     /// through the engine's answer.
     /// </summary>
-    internal abstract void Apply(Heightfield field, ILandscapePictures? pictures);
+    internal abstract void Apply(Heightfield field, BuildContext context);
 
     /// <summary>Changes the field's heights as a step that names no picture does.</summary>
-    internal void Apply(Heightfield field) => Apply(field, null);
+    internal void Apply(Heightfield field) => Apply(field, BuildContext.Alone);
 }

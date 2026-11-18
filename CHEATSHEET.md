@@ -46,6 +46,7 @@ float Spacing { get; }                                   // The distance in mete
 IReadOnlyList<LandscapeStep> Steps { get; }              // The steps in the order they are applied
 Heightfield Build(CancellationToken cancel = default);   // Builds the field from flat ground by the steps in their order
 Heightfield Build(ILandscapePictures? pictures, CancellationToken cancel = default);  // Builds the field from flat ground, its picture stamps read through the engine's pictures
+Heightfield Build(ILandscapePictures? pictures, BuildOptions options, CancellationToken cancel = default);  // Builds the field from flat ground across the threads the options allow, reporting each step as it ends
 void Write(Stream stream);                               // Writes the recipe as JSON, its format, its size and its steps each by its kind
 Recipe Read(Stream stream);                              // Reads a recipe Write wrote
 bool Equals(Recipe? other);                              // Whether two recipes hold the same size and the same steps in the same order
@@ -117,6 +118,7 @@ float Scale { get; init; }                               // The height in meters
 class LandscapeBuilder                                   // Builds a recipe and builds it again after each change, keeping the field each step left so a change applies again the step it reaches and the steps after it alone
 LandscapeBuilder(Recipe recipe, CancellationToken cancel = default);  // A builder that builds a recipe from flat ground
 LandscapeBuilder(Recipe recipe, ILandscapePictures? pictures, CancellationToken cancel = default);  // A builder that reads the pictures its recipes' stamps name through the engine's answer
+LandscapeBuilder(Recipe recipe, ILandscapePictures? pictures, BuildOptions options, CancellationToken cancel = default);  // A builder that builds across the threads the options allow and reports each step it applies
 Recipe Recipe { get; }                                   // The recipe the field was last built from
 Heightfield Field { get; }                               // The field the recipe builds, a copy of the builder's own, which a rebuild replaces and never changes
 LandscapeChange Rebuild(Recipe recipe, CancellationToken cancel = default);  // Builds a changed recipe from the first step that changed
@@ -143,6 +145,7 @@ IReadOnlyList<string> Materials { get; }                 // The materials' names
 IReadOnlyList<byte[]> Layers { get; }                    // The layers, four bytes a texel in red, green, blue and alpha, four materials each
 LandscapeArea? Update(Heightfield field, LandscapeArea area);  // Weighs the points of a changed area again and those beside it, the map holding then what a whole map of the field holds
 SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules);  // Makes a field's splat map by its materials' rules
+SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules, BuildOptions options);  // Makes a field's splat map by its materials' rules across the threads the options allow
 float Weight(int material, int column, int row);         // A material's weight at a point, from nothing to one, the materials' summing to one
 
 record SplatRule                                         // Where a material of a splat map lies, a range of height and a range of steepness, each with a width beyond it over which the material gives way
@@ -204,7 +207,7 @@ uint Seed { get; init; }                                 // The seed it came wit
 
 class LandscapeGeometry                                  // A field as the triangles an engine draws, cut into square tiles so an engine culls them apart and builds again only those a change reaches
 int TileCells = 64;                                      // The number of cells along a tile's side an engine takes where it has no other
-IReadOnlyList<LandscapeMesh> Tiles(Heightfield field, int tileCells = 64, int step = 1, float skirt = 0f);  // Cuts a field into tiles, the last of a row and a column cut to what is left
+IReadOnlyList<LandscapeMesh> Tiles(Heightfield field, int tileCells = 64, int step = 1, float skirt = 0f, BuildOptions? options = null);  // Cuts a field into tiles, the last of a row and a column cut to what is left
 LandscapeMesh Tile(Heightfield field, int column, int row, int tileCells = 64, int step = 1, float skirt = 0f);  // One tile of a field, the cells from its column and row times the tile's side
 float SkirtDepth(Heightfield field, int tileCells = 64, int coarsest = 1);  // How far a skirt hangs so tiles drawn at any steps up to the coarsest meet with no crack
 float StepError(Heightfield field, int column, int row, int step, int tileCells = 64);  // The most in meters a tile drawn at a step stands off the field's points it covers, which a binding weighs against the distance or the error on screen it accepts to pick the step
@@ -218,4 +221,15 @@ Vector3[] Positions { get; init; }                       // A corner a point of 
 Vector3[] Normals { get; init; }                         // The way up out of the ground at each corner, the field's own at its point
 Vector2[] Uvs { get; init; }                             // Where each corner falls over the whole field, from nothing at its first point to one at its last, X in X and Z in Y
 uint[] Indices { get; init; }                            // Three corners a triangle, two triangles a cell, counter-clockwise seen from above
+
+record BuildOptions                                      // How a build runs, the threads it may use and where it reports its progress
+BuildOptions(int threads = 1, IProgress<BuildProgress>? progress = null);  // Options of a count of threads and a progress
+int Threads { get; }                                     // How many threads a build may use
+IProgress<BuildProgress>? Progress { get; }              // Where a build reports each step it has applied, or none
+BuildOptions Default { get; }                            // One thread and no progress, as a build runs where none are given
+
+record struct BuildProgress                              // How far a build has come, the steps applied and the steps of its recipe
+BuildProgress(int Done, int Steps);
+int Done { get; init; }                                  // How many of the recipe's steps stand applied
+int Steps { get; init; }                                 // How many steps the recipe has
 ```

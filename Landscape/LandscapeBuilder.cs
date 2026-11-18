@@ -24,7 +24,7 @@ public sealed class LandscapeBuilder
     // engine that writes into Field changes nothing a rebuild starts from.
     private readonly List<Heightfield> _after = [];
     private Heightfield _last;
-    private readonly ILandscapePictures? _pictures;
+    private readonly BuildContext _context;
 
     /// <summary>A builder that builds a recipe from flat ground.</summary>
     /// <param name="recipe">The recipe.</param>
@@ -44,9 +44,31 @@ public sealed class LandscapeBuilder
     /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
     /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
     public LandscapeBuilder(Recipe recipe, ILandscapePictures? pictures, CancellationToken cancel = default)
+        : this(recipe, pictures, BuildOptions.Default, cancel)
+    {
+    }
+
+    /// <summary>
+    /// A builder that builds across the threads the options allow and reports each step it applies.
+    /// </summary>
+    /// <param name="recipe">The recipe.</param>
+    /// <param name="pictures">
+    /// The engine's answer for the pictures the stamps name, kept for every rebuild.
+    /// </param>
+    /// <param name="options">
+    /// The threads a build may use and where it reports, kept for every rebuild.
+    /// </param>
+    /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
+    /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
+    /// <remarks>
+    /// A rebuild reports the steps it applies, from the first that changed, each as the count of
+    /// the recipe's steps that stand applied, so its last report is the recipe's whole.
+    /// </remarks>
+    public LandscapeBuilder(Recipe recipe, ILandscapePictures? pictures, BuildOptions options, CancellationToken cancel = default)
     {
         ArgumentNullException.ThrowIfNull(recipe);
-        _pictures = pictures;
+        ArgumentNullException.ThrowIfNull(options);
+        _context = new BuildContext(pictures, options);
         Recipe = new Recipe(recipe.Columns, recipe.Rows, recipe.Spacing, []);
         _last = new Heightfield(recipe.Columns, recipe.Rows, recipe.Spacing);
         Field = _last.Copy();
@@ -86,7 +108,8 @@ public sealed class LandscapeBuilder
         for (var step = first; step < recipe.Steps.Count; step++)
         {
             cancel.ThrowIfCancellationRequested();
-            recipe.Steps[step].Apply(field, _pictures);
+            recipe.Steps[step].Apply(field, _context);
+            _context.Options.Progress?.Report(new BuildProgress(step + 1, recipe.Steps.Count));
             built.Add(field);
             if (step + 1 < recipe.Steps.Count) field = field.Copy();
         }

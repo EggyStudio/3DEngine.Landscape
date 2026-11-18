@@ -172,7 +172,7 @@ public sealed record HydraulicErosion : LandscapeStep
         }
     }
 
-    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
+    internal override void Apply(Heightfield field, BuildContext context)
     {
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var unit = 1f / Scale;

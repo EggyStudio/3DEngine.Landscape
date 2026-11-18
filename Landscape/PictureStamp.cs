@@ -78,12 +78,12 @@ public sealed record PictureStamp : LandscapeStep
         init => field = value >= 0f && float.IsFinite(value) ? value : throw new ArgumentOutOfRangeException(nameof(Edge), value, "A picture stamp's edge is a finite number of meters at or above nothing.");
     }
 
-    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
+    internal override void Apply(Heightfield field, BuildContext context)
     {
-        var picture = pictures?.Heights(Picture)
+        var picture = context.Pictures?.Heights(Picture)
             ?? throw new InvalidOperationException($"The recipe stamps the picture {Picture}, which the engine's pictures do not hold.");
         var half = Size * 0.5f;
-        for (var row = 0; row < field.Rows; row++)
+        context.Options.Rows(0, field.Rows - 1, row =>
         {
             for (var column = 0; column < field.Columns; column++)
             {
@@ -102,7 +102,7 @@ public sealed record PictureStamp : LandscapeStep
                 };
                 field[column, row] = ground + (toward - ground) * weight;
             }
-        }
+        });
     }
 
     // The weight a distance in from a side gives, one at the edge's width and beyond.

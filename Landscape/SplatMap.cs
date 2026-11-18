@@ -29,22 +29,23 @@ public sealed class SplatMap
     private readonly float[] _weights;
     private readonly SplatRule[] _rules;
 
-    private SplatMap(Heightfield field, IReadOnlyList<SplatRule> rules)
+    private SplatMap(Heightfield field, IReadOnlyList<SplatRule> rules, BuildOptions options)
     {
         (Columns, Rows, Materials, _rules) = (field.Columns, field.Rows, [.. rules.Select(rule => rule.Material)], [.. rules]);
         _weights = new float[field.Heights.Length * rules.Count];
         Layers = [.. Enumerable.Range(0, (rules.Count + 3) / 4).Select(_ => new byte[field.Heights.Length * 4])];
-        Weigh(field, 0, 0, Columns - 1, Rows - 1);
+        Weigh(field, 0, 0, Columns - 1, Rows - 1, options);
     }
 
-    // The weights and the bytes of the points of a rectangle, each point weighed alone.
-    private void Weigh(Heightfield field, int firstColumn, int firstRow, int lastColumn, int lastRow)
+    // The weights and the bytes of the points of a rectangle, each point weighed alone, so its rows
+    // run on any thread.
+    private void Weigh(Heightfield field, int firstColumn, int firstRow, int lastColumn, int lastRow, BuildOptions options)
     {
         var count = _rules.Length;
-        Span<float> remainders = stackalloc float[count];
-        Span<int> bytes = stackalloc int[count];
-        for (var row = firstRow; row <= lastRow; row++)
+        options.Rows(firstRow, lastRow, row =>
         {
+            Span<float> remainders = stackalloc float[count];
+            Span<int> bytes = stackalloc int[count];
             for (var column = firstColumn; column <= lastColumn; column++)
             {
                 var point = row * Columns + column;
@@ -80,7 +81,7 @@ public sealed class SplatMap
                 // again keeps.
                 for (var m = 0; m < count; m++) Layers[m / 4][point * 4 + m % 4] = (byte)bytes[m];
             }
-        }
+        });
     }
 
     /// <summary>
@@ -113,7 +114,7 @@ public sealed class SplatMap
         var grown = new LandscapeArea(
             Math.Max(area.FirstColumn - 1, 0), Math.Max(area.FirstRow - 1, 0),
             Math.Min(area.LastColumn + 1, Columns - 1), Math.Min(area.LastRow + 1, Rows - 1));
-        Weigh(field, grown.FirstColumn, grown.FirstRow, grown.LastColumn, grown.LastRow);
+        Weigh(field, grown.FirstColumn, grown.FirstRow, grown.LastColumn, grown.LastRow, BuildOptions.Default);
         return grown;
     }
 
@@ -140,7 +141,18 @@ public sealed class SplatMap
     /// <exception cref="ArgumentException">
     /// There is no rule or more than eight, a rule is missing, or two rules name one material.
     /// </exception>
-    public static SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules)
+    public static SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules) => Of(field, rules, BuildOptions.Default);
+
+    /// <summary>
+    /// Makes a field's splat map by its materials' rules across the threads the options allow.
+    /// </summary>
+    /// <param name="field">The field.</param>
+    /// <param name="rules">The materials' rules, from one to <see cref="MostMaterials"/>.</param>
+    /// <param name="options">The threads the map's rows may be weighed on.</param>
+    /// <exception cref="ArgumentException">
+    /// There is no rule or more than eight, a rule is missing, or two rules name one material.
+    /// </exception>
+    public static SplatMap Of(Heightfield field, IReadOnlyList<SplatRule> rules, BuildOptions options)
     {
         ArgumentNullException.ThrowIfNull(field);
         ArgumentNullException.ThrowIfNull(rules);
@@ -148,7 +160,8 @@ public sealed class SplatMap
         if (rules.Any(rule => rule is null)) throw new ArgumentException("A splat map's rules are all there.", nameof(rules));
         if (rules.Select(rule => rule.Material).Distinct(StringComparer.Ordinal).Count() != rules.Count)
             throw new ArgumentException("A splat map's rules name each material once.", nameof(rules));
-        return new SplatMap(field, rules);
+        ArgumentNullException.ThrowIfNull(options);
+        return new SplatMap(field, rules, options);
     }
 
     /// <summary>

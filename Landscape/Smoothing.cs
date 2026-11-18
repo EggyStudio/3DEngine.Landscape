@@ -25,13 +25,15 @@ public sealed record Smoothing : LandscapeStep
         init => field = value is >= 1 and <= 256 ? value : throw new ArgumentOutOfRangeException(nameof(Passes), value, "Smoothing takes from one to 256 passes.");
     }
 
-    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
+    internal override void Apply(Heightfield field, BuildContext context)
     {
         var (columns, rows, heights) = (field.Columns, field.Rows, field.Heights);
         var across = new float[heights.Length];
+        // Each half of a pass reads what the half before it wrote and writes rows of its own, so
+        // its rows run on any thread and the halves one after the other.
         for (var pass = 0; pass < Passes; pass++)
         {
-            for (var row = 0; row < rows; row++)
+            context.Options.Rows(0, rows - 1, row =>
             {
                 for (var column = 0; column < columns; column++)
                 {
@@ -40,9 +42,9 @@ public sealed record Smoothing : LandscapeStep
                     var right = heights[row * columns + Math.Min(column + 1, columns - 1)];
                     across[at] = (left + 2f * heights[at] + right) * 0.25f;
                 }
-            }
+            });
 
-            for (var row = 0; row < rows; row++)
+            context.Options.Rows(0, rows - 1, row =>
             {
                 for (var column = 0; column < columns; column++)
                 {
@@ -50,7 +52,7 @@ public sealed record Smoothing : LandscapeStep
                     var front = across[Math.Min(row + 1, rows - 1) * columns + column];
                     heights[row * columns + column] = (back + 2f * across[row * columns + column] + front) * 0.25f;
                 }
-            }
+            });
         }
     }
 }

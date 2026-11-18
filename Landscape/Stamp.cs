@@ -91,7 +91,7 @@ public sealed record Stamp : LandscapeStep
         };
     }
 
-    internal override void Apply(Heightfield field, ILandscapePictures? pictures)
+    internal override void Apply(Heightfield field, BuildContext context)
     {
         // The points whose cell can reach the radius, cut to the field's own.
         var reach = Radius / field.Spacing;
@@ -100,7 +100,7 @@ public sealed record Stamp : LandscapeStep
         var (first, last) = (Math.Max((int)MathF.Floor(middleX - reach), 0), Math.Min((int)MathF.Ceiling(middleX + reach), field.Columns - 1));
         var (front, back) = (Math.Max((int)MathF.Floor(middleZ - reach), 0), Math.Min((int)MathF.Ceiling(middleZ + reach), field.Rows - 1));
 
-        for (var row = front; row <= back; row++)
+        context.Options.Rows(front, back, row =>
         {
             for (var column = first; column <= last; column++)
             {
@@ -117,7 +117,7 @@ public sealed record Stamp : LandscapeStep
                     _ => ground + (Height - ground) * share,
                 };
             }
-        }
+        });
     }
 
     private static float Square(float value) => value * value;

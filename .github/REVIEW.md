@@ -485,3 +485,47 @@ day's commits. The cheatsheet written again changes six lines, the ray's reach a
 ranges with their infinite defaults as `float.PositiveInfinity` and `float.NegativeInfinity`, and
 the area's tiles, the placement's places and the tile's bounds with their tuples' names. The tests
 pass, 111.
+
+The next three, each opening with a test that fails.
+
+1. **A build that reports its progress and uses the machine's threads.** A whole build of every step
+   at 4,097 points a side takes 19 s on one thread, where an editor shows its progress and a game
+   keeps its frame. `Recipe.Build` and `LandscapeBuilder` take `BuildOptions`, the threads a build
+   may use and a progress it reports a step at a time, and the steps whose every point is reckoned
+   alone, the stamps, the noise, the terraces and the smoothing, and the splat map and the tiles,
+   run their rows across the threads, the erosions staying on one, so the bits are the same at any
+   count. Its tests fail first: a build at one thread and at eight giving the same bits for every
+   recipe the tests pin, the progress reported once a step in order up to the whole, and a count of
+   threads below one refused. The bench reads the time after.
+
+2. **A normal map.** A tile drawn far off at a step of 16 lights its ground by the coarse corners'
+   normals and loses the ridges between them. `NormalMap.Of` gives the field's normal at every point
+   as RGBA bytes, a texel a point as the splat layers lie, and `Update` weighs a change's area
+   again, so a binding lights every tile by the field's own normals at any step. Its tests fail
+   first: every texel decoding to the field's normal within a byte's rounding, an update over a
+   change equal to a whole map, and the texture coordinates' half texel the splat map's.
+
+3. **Masks as plain data, on the owner's word.** A picture of weights a step is scaled by, so a step
+   acts on part of the field, which serves every step and needs no editor. The owner was asked in
+   this session whether the recipe takes masks and strokes and has not answered, so the third waits
+   for that word, and in its place holes in the ground, a mask of points no tile draws, for a cave's
+   or a tunnel's mouth, come third where the owner declines.
+
+The first of the three in the commit carrying this line, a build across threads that reports its
+progress. Its tests came first and failed for want of the types. `BuildOptions` gives the threads a
+build may use and an `IProgress` of `BuildProgress`, the steps applied and the recipe's steps, which
+`Recipe.Build`, `LandscapeBuilder`, `SplatMap.Of` and `LandscapeGeometry.Tiles` take. The stamps,
+the picture stamps, the noise, the terraces and each half of a smoothing pass, and the splat map and
+the tiles, share their rows among the threads, each row reckoned alone, and the erosions run on one,
+so the bits are the same at any count. Five tests hold every step's bits at eight threads equal to
+one's and to a build with no options, the splat map's and the tiles' the same, the progress once a
+step in order to the whole, a rebuild reporting the steps it applies, and a count below one refused.
+The bench, under a load of 24 on the machine's 32 threads from other work, built 1,025 a side in 922
+ms at eight threads where one took 1,147, and 4,097 a side in 16.7 s where one took 16.5, the steps
+that share their rows taking some 2.7 s of it and the erosions on one thread the rest, in
+`2026-11-18-item-3-threads.md`. Thermal erosion, 6.7 s at 4,097, gathers each pass's moves into a
+second field and could be written as each point's gather from its eight neighbors, whose sum order
+is its own and the same on any thread, which would move its pinned hash once; that is for the review
+to order. Tools moves to `1e1ec63` by `pin.py`, which printed that the pin moved from `4e922ea` by 2
+commits with no fact new or changed and wrote the cheatsheet and the devlog again. The tests pass,
+116 where there were 111.

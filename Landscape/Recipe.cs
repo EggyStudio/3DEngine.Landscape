@@ -64,13 +64,33 @@ public sealed record Recipe
     /// <exception cref="InvalidOperationException">
     /// A step stamps a picture the engine holds none of.
     /// </exception>
-    public Heightfield Build(ILandscapePictures? pictures, CancellationToken cancel = default)
+    public Heightfield Build(ILandscapePictures? pictures, CancellationToken cancel = default) =>
+        Build(pictures, BuildOptions.Default, cancel);
+
+    /// <summary>
+    /// Builds the field from flat ground across the threads the options allow, reporting each
+    /// step as it ends.
+    /// </summary>
+    /// <param name="pictures">
+    /// The engine's answer for the pictures the recipe's stamps name.
+    /// </param>
+    /// <param name="options">
+    /// The threads the build may use and where it reports its progress.
+    /// </param>
+    /// <param name="cancel">Asks the build to stop, which it does before the next step.</param>
+    /// <exception cref="OperationCanceledException">The build was asked to stop.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// A step stamps a picture the engine holds none of.
+    /// </exception>
+    public Heightfield Build(ILandscapePictures? pictures, BuildOptions options, CancellationToken cancel = default)
     {
-        var field = new Heightfield(Columns, Rows, Spacing);
-        foreach (var step in Steps)
+        ArgumentNullException.ThrowIfNull(options);
+        var (field, context) = (new Heightfield(Columns, Rows, Spacing), new BuildContext(pictures, options));
+        for (var step = 0; step < Steps.Count; step++)
         {
             cancel.ThrowIfCancellationRequested();
-            step.Apply(field, pictures);
+            Steps[step].Apply(field, context);
+            options.Progress?.Report(new BuildProgress(step + 1, Steps.Count));
         }
 
         return field;

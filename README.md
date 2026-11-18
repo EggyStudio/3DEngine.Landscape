@@ -85,7 +85,7 @@ recipe with no picture stamp needs no interface at all, as the smallest binding 
 | Pictures | A row at a time from the stamp's least Z, each along X, the order an image file is read from its top, its gray a share of the stamp's height |
 | Recipes | JSON on a `Stream`, by `Recipe.Write` and `Recipe.Read`, format 1, each step by its kind and each number as the shortest text that reads back to the same float |
 | Light and color | None, the module holds no light, no color and no exposure |
-| Threads | A build runs on the thread that calls it, stops on its cancellation token, and one builder serves one thread at a time |
+| Threads | A build runs on the thread that calls it, stops on its cancellation token, and shares the rows of its stamps, noise, terraces and smoothing, and a splat map's and the tiles', among the threads a `BuildOptions` allows, the erosions on one, so it gives the same bits at any count; it reports each step it applies as a `BuildProgress`, and one builder serves one thread at a time |
 
 An engine with Z up and right-handed axes takes a corner `(x, y, z)` as `(x, -z, y)`, a turn about
 X that keeps the winding. An engine with left-handed axes and Y up takes it as `(x, y, -z)`, and an

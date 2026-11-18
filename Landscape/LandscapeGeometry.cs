@@ -34,23 +34,22 @@ public static class LandscapeGeometry
     /// How far in meters a ring of corners hangs below each tile's edge, nothing for none, as
     /// <see cref="SkirtDepth"/> reckons it for tiles drawn at different steps.
     /// </param>
+    /// <param name="options">
+    /// The threads the tiles may be made on, one where none are given.
+    /// </param>
     /// <returns>The tiles a row at a time, each row along X and the rows along Z.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// The tile's cells are fewer than one, the step is not a power of two dividing them, or the
     /// skirt is below nothing or not finite.
     /// </exception>
-    public static IReadOnlyList<LandscapeMesh> Tiles(Heightfield field, int tileCells = TileCells, int step = 1, float skirt = 0f)
+    public static IReadOnlyList<LandscapeMesh> Tiles(Heightfield field, int tileCells = TileCells, int step = 1, float skirt = 0f, BuildOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(field);
         Check(tileCells, step, skirt);
         var across = (field.Columns - 2) / tileCells + 1;
         var along = (field.Rows - 2) / tileCells + 1;
         var tiles = new LandscapeMesh[across * along];
-        for (var row = 0; row < along; row++)
-        {
-            for (var column = 0; column < across; column++)
-                tiles[row * across + column] = Tile(field, column, row, tileCells, step, skirt);
-        }
+        (options ?? BuildOptions.Default).Rows(0, across * along - 1, i => tiles[i] = Tile(field, i % across, i / across, tileCells, step, skirt));
 
         return tiles;
     }
