@@ -162,7 +162,8 @@ float SteepBlend { get; }                                // How far in steepness
 float Weight(float height, float steepness);             // The material's weight before the weights are brought to one, from nothing to one
 
 record Masked                                            // A step scaled by a picture of weights over a rectangle, so it acts on part of the field, the weights read through the engine's ILandscapePictures by the picture's name
-Masked(LandscapeStep step, string mask, Vector2 place, Vector2 size);  // A step masked by a picture over a rectangle
+Masked(LandscapeStep step, string mask, Vector2 place, Vector2 size, int turns = 0);  // A step masked by a picture over a rectangle
+int Turns { get; init; }                                 // How many quarter turns the picture is turned by within the rectangle, from nothing to three
 LandscapeStep Step { get; init; }                        // The step the weights scale
 string Mask { get; init; }                               // The picture's name, its shares the weights, which the engine answers for
 Vector2 Place { get; init; }                             // The rectangle's middle across the ground, X in X and Z in Y
@@ -183,7 +184,8 @@ Vector2 Place { get; init; }                             // Its middle across th
 float Radius { get; init; }                              // How far from its middle a cell's middle lies to be a hole, in meters
 
 record PictureStamp                                      // A picture's heights pressed into the field over a rectangle, a mountain or a riverbed an artist drew, read through the engine's ILandscapePictures by its name
-PictureStamp(string picture, Vector2 place, Vector2 size, float height, StampBlend blend = StampBlend.Add, float edge = 0f);  // A stamp of a picture over a rectangle
+PictureStamp(string picture, Vector2 place, Vector2 size, float height, StampBlend blend = StampBlend.Add, float edge = 0f, int turns = 0);  // A stamp of a picture over a rectangle
+int Turns { get; init; }                                 // How many quarter turns the picture is turned by within the rectangle, from nothing to three
 string Picture { get; init; }                            // The picture's name, which the engine answers for
 Vector2 Place { get; init; }                             // The rectangle's middle across the ground, X in X and Z in Y
 Vector2 Size { get; init; }                              // The rectangle's width along X in X and its depth along Z in Y, in meters

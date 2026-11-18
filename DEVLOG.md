@@ -6,6 +6,13 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-19
+
+Commits that day
+
+- `f311d11` A tile gives its indices as 16-bit numbers where its corners fit them, shared between
+  tiles that share their indices, so an engine draws it at half the index memory.
+
 ## 2026-11-18
 
 ![](.github/assets/readings/2026-11-18-item-3-stamps.webp)

@@ -46,6 +46,21 @@ public sealed record HeightPicture
     /// <param name="v">How far along Z, from nothing to one.</param>
     public float At(float u, float v)
     {
+        return Sample(u, v);
+    }
+
+    // The share at a place across a rectangle the picture is turned within by quarter turns, a
+    // quarter taking its first row, along X, to run along Z at the rectangle's greatest X.
+    internal float At(float u, float v, int turns) => turns switch
+    {
+        0 => Sample(u, v),
+        1 => Sample(v, 1f - u),
+        2 => Sample(1f - u, 1f - v),
+        _ => Sample(1f - v, u),
+    };
+
+    private float Sample(float u, float v)
+    {
         var x = Math.Clamp(u, 0f, 1f) * (Width - 1);
         var z = Math.Clamp(v, 0f, 1f) * (Height - 1);
         var (column, row) = (Math.Min((int)x, Width - 2), Math.Min((int)z, Height - 2));

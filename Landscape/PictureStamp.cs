@@ -30,14 +30,32 @@ public sealed record PictureStamp : LandscapeStep
     /// <param name="height">The height in meters a share of one stands at.</param>
     /// <param name="blend">How the picture meets the heights before it.</param>
     /// <param name="edge">How many meters in from each side the stamp fades over.</param>
+    /// <param name="turns">
+    /// How many quarter turns the picture is turned by within the rectangle, from nothing to three,
+    /// a quarter taking its first row, along X, to run along Z at the rectangle's greatest X.
+    /// </param>
     /// <exception cref="ArgumentException">The picture has no name.</exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// A number is out of the range its parameter gives.
     /// </exception>
-    public PictureStamp(string picture, Vector2 place, Vector2 size, float height, StampBlend blend = StampBlend.Add, float edge = 0f)
+    public PictureStamp(string picture, Vector2 place, Vector2 size, float height, StampBlend blend = StampBlend.Add, float edge = 0f, int turns = 0)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(picture);
-        (Picture, Place, Size, Height, Blend, Edge) = (picture, place, size, height, blend, edge);
+        (Picture, Place, Size, Height, Blend, Edge, Turns) = (picture, place, size, height, blend, edge, turns);
+    }
+
+    /// <summary>
+    /// How many quarter turns the picture is turned by within the rectangle, from nothing to three.
+    /// </summary>
+    /// <remarks>
+    /// A turn reorders where the picture is read and reckons no sine or cosine, so a turned picture
+    /// gives the same bits on every system, and the rectangle's size is its size on the ground
+    /// after the turn.
+    /// </remarks>
+    public int Turns
+    {
+        get;
+        init => field = value is >= 0 and <= 3 ? value : throw new ArgumentOutOfRangeException(nameof(Turns), value, "A picture is turned by from nothing to three quarter turns.");
     }
 
     /// <summary>The picture's name, which the engine answers for.</summary>
@@ -91,7 +109,7 @@ public sealed record PictureStamp : LandscapeStep
                 if (!(MathF.Abs(from.X) <= half.X && MathF.Abs(from.Y) <= half.Y)) continue;
                 var weight = Fade(half.X - MathF.Abs(from.X)) * Fade(half.Y - MathF.Abs(from.Y));
                 if (weight == 0f) continue;
-                var stamped = Height * picture.At((from.X + half.X) / Size.X, (from.Y + half.Y) / Size.Y);
+                var stamped = Height * picture.At((from.X + half.X) / Size.X, (from.Y + half.Y) / Size.Y, Turns);
                 var ground = field[column, row];
                 var toward = Blend switch
                 {

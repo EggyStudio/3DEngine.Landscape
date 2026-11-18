@@ -616,3 +616,11 @@ where its corners number 65,536 or fewer, and nothing where they number more, ma
 array of indices and kept beside it, so tiles sharing their indices share their short ones. One test
 holds them equal to the indices, shared between two tiles, and nothing for a tile of 66,049 corners.
 The tests pass, 133.
+
+Quarter turns in the commit carrying this line, the fourth hourly step. Its tests came first and
+failed for want of the parameters. `PictureStamp` and `Masked` take `Turns`, from nothing to three
+quarter turns of their picture within the rectangle, a quarter taking the picture's first row, along
+X, to run along Z at the rectangle's greatest X, by reading the picture at another place and with no
+sine or cosine, so a recipe of no turn builds its pinned bits as before. Five tests hold a stamp
+turned a quarter and a half equal to the stamps of pictures turned by hand, three turns a half turn
+of a quarter, a mask turned as a stamp is, and the refusals and the JSON. The tests pass, 138.

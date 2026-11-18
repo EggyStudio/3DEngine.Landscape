@@ -31,16 +31,34 @@ public sealed record Masked : LandscapeStep
     /// <param name="size">
     /// The rectangle's width along X in X and its depth along Z in Y, in meters.
     /// </param>
+    /// <param name="turns">
+    /// How many quarter turns the picture is turned by within the rectangle, from nothing to three,
+    /// a quarter taking its first row, along X, to run along Z at the rectangle's greatest X.
+    /// </param>
     /// <exception cref="ArgumentNullException">The step is missing.</exception>
     /// <exception cref="ArgumentException">The mask has no name.</exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// The place is not finite or the size not above nothing.
     /// </exception>
-    public Masked(LandscapeStep step, string mask, Vector2 place, Vector2 size)
+    public Masked(LandscapeStep step, string mask, Vector2 place, Vector2 size, int turns = 0)
     {
         ArgumentNullException.ThrowIfNull(step);
         ArgumentException.ThrowIfNullOrWhiteSpace(mask);
-        (Step, Mask, Place, Size) = (step, mask, place, size);
+        (Step, Mask, Place, Size, Turns) = (step, mask, place, size, turns);
+    }
+
+    /// <summary>
+    /// How many quarter turns the picture is turned by within the rectangle, from nothing to three.
+    /// </summary>
+    /// <remarks>
+    /// A turn reorders where the picture is read and reckons no sine or cosine, so a turned picture
+    /// gives the same bits on every system, and the rectangle's size is its size on the ground
+    /// after the turn.
+    /// </remarks>
+    public int Turns
+    {
+        get;
+        init => field = value is >= 0 and <= 3 ? value : throw new ArgumentOutOfRangeException(nameof(Turns), value, "A picture is turned by from nothing to three quarter turns.");
     }
 
     /// <summary>The step the weights scale.</summary>
@@ -97,6 +115,6 @@ public sealed record Masked : LandscapeStep
         var from = place - Place;
         var half = Size * 0.5f;
         if (!(MathF.Abs(from.X) <= half.X && MathF.Abs(from.Y) <= half.Y)) return 0f;
-        return mask.At((from.X + half.X) / Size.X, (from.Y + half.Y) / Size.Y);
+        return mask.At((from.X + half.X) / Size.X, (from.Y + half.Y) / Size.Y, Turns);
     }
 }
