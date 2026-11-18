@@ -19,8 +19,8 @@ public sealed record SplatRule
     /// </param>
     /// <param name="heightBlend">How many meters beyond either height it gives way over.</param>
     /// <param name="leastSteep">
-    /// The least steepness it covers whole, as <see cref="Heightfield.Steepness"/> gives a rise
-    /// over a run.
+    /// The least steepness it covers whole, as <see cref="Heightfield.Steepness(int, int)"/> gives
+    /// a rise over a run.
     /// </param>
     /// <param name="mostSteep">The most steepness it covers whole, at or above the least.</param>
     /// <param name="steepBlend">How far in steepness beyond either end it gives way over.</param>

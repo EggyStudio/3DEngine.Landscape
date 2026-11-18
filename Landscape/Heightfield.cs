@@ -146,6 +146,35 @@ public sealed class Heightfield
         return MathF.Sqrt(x * x + z * z);
     }
 
+    /// <summary>
+    /// How steep the ground is anywhere over the field as a rise over a run, between its points
+    /// blended from theirs.
+    /// </summary>
+    /// <param name="place">
+    /// The place across the ground, its X in X and its Z in Y, about the field's middle.
+    /// </param>
+    public float Steepness(Vector2 place)
+    {
+        var (column, across, row, along) = Cell(place);
+        var (x00, z00) = Rise(column, row);
+        var (x10, z10) = Rise(column + 1, row);
+        var (x01, z01) = Rise(column, row + 1);
+        var (x11, z11) = Rise(column + 1, row + 1);
+        var riseX = Lerp(Lerp(x00, x10, across), Lerp(x01, x11, across), along);
+        var riseZ = Lerp(Lerp(z00, z10, across), Lerp(z01, z11, across), along);
+        return MathF.Sqrt(riseX * riseX + riseZ * riseZ);
+    }
+
+    /// <summary>Whether a place lies over the field, its edge counted in.</summary>
+    /// <param name="place">
+    /// The place across the ground, its X in X and its Z in Y, about the field's middle.
+    /// </param>
+    public bool Covers(Vector2 place)
+    {
+        var half = Size * 0.5f;
+        return place.X >= -half.X && place.X <= half.X && place.Y >= -half.Y && place.Y <= half.Y;
+    }
+
     /// <summary>A field of the same size holding the same heights, apart from this one.</summary>
     public Heightfield Copy()
     {

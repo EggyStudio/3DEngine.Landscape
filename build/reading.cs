@@ -37,14 +37,8 @@ var recipes = new Dictionary<string, Recipe>
     ["droplets-after"] = Droplets(eroded: true),
     // The tests' ground of three stamps, noise and a steep cone (Landscape.Tests/SplatTests.cs),
     // drawn in the colors of the splat map's four materials.
-    ["splat"] = new(129, 129, 1f,
-    [
-        new Stamp(StampShape.Dome, new(-10f, 5f), 45f, 18f),
-        new Stamp(StampShape.Plateau, new(20f, -15f), 25f, 8f, StampBlend.Replace),
-        new Stamp(StampShape.Crater, new(55f, 50f), 30f, 6f),
-        new Noise(9, 24f, 4, 1.5f),
-        new Stamp(StampShape.Cone, new(-40f, -40f), 15f, 20f),
-    ]),
+    ["placement"] = Splat(),
+    ["splat"] = Splat(),
 };
 
 // The splat recipe's materials as the tests give them, sand, grass, rock and snow, and a color
@@ -67,7 +61,30 @@ if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 Directory.CreateDirectory(args[0]);
 var field = recipe.Build();
 var tiles = LandscapeGeometry.Tiles(field);
-var splat = args[1] == "splat" ? SplatMap.Of(field, rules) : null;
+var splat = args[1] is "splat" or "placement" ? SplatMap.Of(field, rules) : null;
+
+// The placement recipe's trees, a place every 1.5 m jittered from a hash of its number, kept on
+// grass below 12 m and no steeper than 0.4 by the grass's weight as their density, each marking
+// its nearest point.
+var trees = new HashSet<(int, int)>();
+if (args[1] == "placement")
+{
+    var places = Enumerable.Range(0, 85 * 85).Select(i =>
+    {
+        // A hash of the number by Murmur3's finalizer, whose bits do not follow the number's.
+        var hash = (uint)i * 2654435761u;
+        hash ^= hash >> 16;
+        hash *= 0x85EBCA6Bu;
+        hash ^= hash >> 13;
+        hash *= 0xC2B2AE35u;
+        hash ^= hash >> 16;
+        var (x, z) = ((hash & 0xFFFF) / 65536f - 0.5f, (hash >> 16) / 65536f - 0.5f);
+        return (new Vector3(-63f + 1.5f * (i % 85 + x), 0f, -63f + 1.5f * (i / 85 + z)), hash);
+    });
+    var rule = new PlacementRule(lowest: 1f, highest: 12f, heightBlend: 1f, mostSteep: 0.4f, steepBlend: 0.1f);
+    foreach (var planted in Placement.Keep(field, places, rule, DensityMap.Of(splat!, 1)))
+        trees.Add(((int)MathF.Round(planted.Place.X / field.Spacing + (field.Columns - 1) * 0.5f), (int)MathF.Round(planted.Place.Z / field.Spacing + (field.Rows - 1) * 0.5f)));
+}
 
 // A corner's color, the splat map's materials blended by their weights at its point, or a dry
 // ground's where the recipe has no splat map.
@@ -76,6 +93,7 @@ Vector3 Tint(Vector3 corner)
     if (splat is null) return new Vector3(0.62f, 0.55f, 0.42f);
     var column = (int)MathF.Round(corner.X / field.Spacing + (field.Columns - 1) * 0.5f);
     var row = (int)MathF.Round(corner.Z / field.Spacing + (field.Rows - 1) * 0.5f);
+    if (trees.Contains((column, row))) return new Vector3(0.03f, 0.10f, 0.03f);
     var color = Vector3.Zero;
     for (var m = 0; m < colors.Length; m++) color += splat.Weight(m, column, row) * colors[m];
     return color;
@@ -92,6 +110,15 @@ var contours = Path.Combine(args[0], $"{args[1]}-contours.png");
 WritePng(contours, Contours(field, 440, 1f));
 Console.WriteLine(contours);
 return 0;
+
+static Recipe Splat() => new(129, 129, 1f,
+[
+    new Stamp(StampShape.Dome, new(-10f, 5f), 45f, 18f),
+    new Stamp(StampShape.Plateau, new(20f, -15f), 25f, 8f, StampBlend.Replace),
+    new Stamp(StampShape.Crater, new(55f, 50f), 30f, 6f),
+    new Noise(9, 24f, 4, 1.5f),
+    new Stamp(StampShape.Cone, new(-40f, -40f), 15f, 20f),
+]);
 
 static Recipe Droplets(bool eroded) => new(193, 193, 1f,
 [

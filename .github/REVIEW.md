@@ -312,3 +312,24 @@ since the fourth fact holds it, and the comment width test stays, since Tools ho
 Tools'. On the first run the references, the engine names and the binding block passed, and the
 README's naming of the public types failed on `LandscapeStep`, which no local copy checked, so the
 README's row for `Recipe` names it. AGENTS.md takes a row for `modules`. The tests pass, 67.
+
+The placement in the commit carrying this line. `Placement.Keep` takes the places a planting gives,
+a place and a seed each, as Vegetation's forest gives them, with no reference to its project, and
+keeps each where a number drawn from its own seed falls below its chance, the `PlacementRule`'s
+shares of height and steepness, the ranges and blends a `SplatRule` has, times a `DensityMap`'s
+share, which an engine paints a point each or takes from a splat material's weights. A kept place is
+a `Planted`, lifted to the ground's height with the ground's normal and its seed, in the order it
+came, and a place off the field is not kept. `Heightfield` gains a steepness anywhere over the field
+and whether a place lies over it. Eight tests come with it, the places on the ground with their
+normals and seeds, nothing kept outside the ranges and blends and everything well inside them, a
+density of a half keeping between 48 and 52 hundredths of 7,225 places and of nothing none, a seed
+deciding its place whatever comes before it, a splat material as a density map, places off the
+field, the refusals and a pinned hash of the kept places. The reading is
+`2026-11-18-item-3-placement.webp`, trees on the splat ground standing on grass alone. DEVLOG.md is
+linked from the README's top line and AGENTS.md names its command, `python3 -I
+modules/Tools/scripts/devlog.py . Landscape`, and regenerated it holds 2 days, 5 pictures and 2
+items done. The strict build is clean and the tests pass, 75.
+
+**Rule:** the README's opening says each engine implements the interfaces the module declares,
+where the module declares none and its binding section says so. The words under the header stand
+as written (STYLE.md), so they wait for the owner's word.

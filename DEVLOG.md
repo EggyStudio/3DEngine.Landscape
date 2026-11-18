@@ -32,6 +32,11 @@ filled by none, which dug pits without end, and after the same droplets with the
 base level, which cuts gullies down both hills and fills their feet, oblique, lit from above and in
 contours of a meter.
 
+![](.github/assets/readings/2026-11-18-item-3-placement.webp)
+Trees kept from a place every 1.5 m on the splat ground by a rule of grass from 1 to 12 m no steeper
+than 0.4 and the grass's weight as their density, each a dark point, standing on the plateau, the
+dome's grass and the crater's rim and on no rock, sand or snow.
+
 ## 2026-10-31
 
 Done that day

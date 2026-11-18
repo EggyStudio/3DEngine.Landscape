@@ -1,5 +1,7 @@
 # Landscape
 
+[Devlog](DEVLOG.md)
+
 Landscape is a library both engines, 3DEngine and BevyCSharp, take as a git submodule, for a
 heightfield whose recipe is an ordered list of stamps and procedural operations applied again on
 each change, erosion among them, with vegetation placed through Vegetation by slope, height and a
@@ -16,6 +18,7 @@ implements the interfaces it declares where it binds the module.
 | `Noise`, `Terrace`, `Smoothing`, `ThermalErosion`, `HydraulicErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur, ground slumping to its talus, and droplets from a seed cutting channels and filling the feet of slopes |
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
 | `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
+| `Placement`, `PlacementRule`, `DensityMap` | The places a planting gives, as a place and a seed each, kept by a rule's ranges of height and steepness and a density map, painted or taken from a splat material, and lifted onto the ground as `Planted` with the ground's normal |
 | `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field and indices |
 
 A recipe gives the same heights to the bit on Linux, Windows and macOS, since its steps use only
@@ -27,7 +30,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement>
 ```
 
 ## Taking it into an engine
