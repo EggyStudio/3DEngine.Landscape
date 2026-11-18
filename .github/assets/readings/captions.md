@@ -1,0 +1,1 @@
+2026-11-18-item-3-stamps.webp | Three stamps on 129 by 129 points a meter apart, a dome of 18 m, a plateau at 8 m that replaces and a crater of 6 m added over the corner, drawn from the module's own tiles on the CPU by build/reading.cs, oblique and from above, lit by a sun 33 degrees high from the top left.

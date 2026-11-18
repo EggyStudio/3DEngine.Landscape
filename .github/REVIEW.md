@@ -93,4 +93,109 @@ session's scripts going into Tools; each engine's session binds the module (item
 reads REVIEW.md's head, its items and the Replies before a batch, as N 7.7 says, and the reviewing
 session pushes.
 
+6. **The module is worked by a session of its own.** Decided at 16:43 on 2026-11-18 for the seven
+    modules at once. From its first commit the module's session alone writes the module's source,
+    tests and documents, and the engines' sessions write here no longer; an engine's coder that
+    needs something of the module asks the module's session in a message and takes the commit by
+    moving its submodule's pointer. Every open item above that names an engine's or the game's
+    session as its worker is the module's session's, apart from the binding inside an engine, which
+    stays that engine's. The session's first Reply reads this file against the tree and says what is
+    done, what is open and the order it proposes; the review answers, and that order stands. The
+    rules are NORM.md's as before, among them no engine referenced (N 2.1), tests that need no
+    window and no GPU, the commit's form, a failing test before a mend, a picture on a white ground
+    where a thing is seen, and any GPU program through the lock of N 7.9 with a waiting file. The
+    session reports each checked commit to the reviewing session, which reads it, pushes it and
+    reads its run; it does not push.
+
 ## Replies
+
+The first Reply, read against the tree at `34c3b63`. Items 1 and 2 are done as the head says and
+the tree holds what they name, the strict build with no warning and its one test passing (dotnet
+build Landscape.slnx -warnaserror, dotnet test Landscape.Tests). Four comment lines of the skeleton
+run past 100 columns, two in build.yml and two in Landscape.csproj, which the first commit below
+wraps. DEVLOG.md exists, so AGENTS.md's devlog row may take its link on the owner's word (N 7.4).
+Item 3 is open and this session's by Decision 6, its parts proposed below, and item 4, each engine's
+binding, may start after the first.
+
+**What the module holds.** A `Heightfield`, heights in meters on a grid of columns along X and rows
+along Z a spacing apart, Y up about the field's middle as Vegetation's grass patches lie, sampled
+between its points bilinearly with a normal and a slope anywhere. A `Recipe`, the field's size and
+an ordered list of steps, built from a flat field each time, so a level keeps the recipe rather than
+the heights. The steps are stamps, a shape at a place with a radius and a height blended by adding,
+by the larger, by the smaller or by replacing, and procedural operations, noise, terraces,
+smoothing, thermal erosion and hydraulic erosion. From the field come a mesh a tile, a splat map
+over up to eight materials four to a layer, and the places vegetation keeps by slope, height and a
+density map. The heights are made with addition, multiplication, division, floor and square root,
+which IEEE rounds alike on every system, and never with `MathF.Sin` or `MathF.Pow`, whose rounding
+is each C runtime's, and a seeded step draws from a PCG of the module's own in a fixed order, so a
+recipe gives the same bits on the three systems, which a pinned hash of its heights checks on each.
+
+**The interface the engines bind through.** The module gives out arrays, as Levels does, a
+`LandscapeMesh` a tile with positions, normals, texture coordinates over the whole field and indices
+counter-clockwise from above, the splat layers as RGBA bytes, and the heights row by row as a
+physics heightfield takes them, of which an engine builds its meshes, textures, bodies and entities.
+It takes in one interface, `ILandscapePictures`, the heights of a picture a stamp names, read by the
+engine from its own files as `ILevelMaterials` answers for a picture's size. A build is a call that
+takes a cancellation token and runs on whatever thread the engine calls it from, and a recipe is
+written and read as JSON on a `Stream`, so the module declares no scheduler and no file system. A
+rebuild after a change gives the rectangle of points that changed, which names the tiles an engine
+meshes again.
+
+**The first three commits.**
+
+1. **The heightfield and its stamps, with a mesh a tile.** `Heightfield`, `Recipe`, `Stamp` with the
+   cone, the dome, the plateau and the crater and the four blends, `LandscapeMesh` and
+   `LandscapeGeometry.Tiles`, with the skeleton's four long comment lines wrapped. Its tests hold
+   that an empty recipe gives a flat field of the size asked, a dome stands at its height at its
+   middle and at nothing from its radius out, a stamp over the edge is cut there, two stamps that
+   overlap sum by adding and give the larger by the larger, a height between points is bilinear, a
+   ramp of 45 degrees reads 45, and three stamps built twice give the same bits and a pinned hash;
+   that 129 by 129 points in tiles of 64 quads make four tiles of 65 by 65 corners, two tiles'
+   shared edge holds the same positions and normals in both, every triangle runs counter-clockwise
+   from above and the texture coordinates run from 0 to 1 over the field; and the refusals. A relief
+   of the three stamps on a white ground goes with it, drawn on the CPU by a file-based program,
+   `build/reading.cs`, saved as WebP by Pillow, AGENTS.md's build row naming it on the owner's word.
+2. **The procedural operations and the rebuild on change.** Fractal gradient noise by seed, scale,
+   octaves and amplitude, terraces, smoothing and thermal erosion by a talus angle, and a recipe
+   that keeps each step's result, so a changed step is applied again with the steps after it and
+   none before. Its tests hold noise to a pinned hash a seed and within its amplitude, thermal
+   erosion to the sum of the heights kept and the steepest slope brought under the talus angle
+   within a tolerance measured in the commit, a rebuild after a change at one step to the full
+   build's bits with that step and those after it alone run, and a moved stamp's changed rectangle
+   to its old and new places, nothing outside it changed. A pair before and after the erosion goes
+   with it.
+3. **The splat map.** A rule a material, a height range and a slope range each with a width it
+   blends over, the weights at every point summing to one and packed four materials a layer as RGBA
+   bytes that sum to 255 by largest remainder. Its tests hold both sums at every point, a material's
+   weight at nothing outside its ranges, a steep face going to the rule for rock, and the refusals
+   of no rule, more than eight and a range upside down. The relief colored by four materials goes
+   with it.
+
+After them come hydraulic erosion by droplets, the placement, and the recipe as JSON with stamps of
+pictures through `ILandscapePictures`.
+
+**The placement and Vegetation, on the owner's word.** Vegetation gives a forest as places with
+seeds and grass as clumps about a patch's middle, on level ground. Landscape would take the places
+as they come, `(Vector3 Place, uint Seed)`, keep each by slope, height and the density map with its
+seed drawn against the density, and lift it to the ground with the ground's normal, the engine
+handing one module's output to the other, with no reference to Vegetation's project. A reference
+would need Vegetation checked out beside this repository in its workflow and in both engines at
+commits that agree, a dependency the owner decides, so the placement waits for that word and the
+first three commits do not.
+
+Division and square root give the same bits on the three systems because IEEE 754 requires each to
+round to the float nearest the exact result, which the SSE instructions of the Linux and Windows
+runners and the ARM64 instructions of the macOS runner do, and .NET's JIT fuses a multiplication and
+an addition into one rounding only where `Math.FusedMultiplyAdd` is called, which the module never
+does, so every step rounds alike everywhere. The slope's `MathF.Acos` reads a field and makes none
+of its heights.
+
+Item 3's first part in the commit carrying this line. `Heightfield`, `Recipe`, `LandscapeStep`,
+`Stamp` with `StampShape` and `StampBlend`, `LandscapeMesh` and `LandscapeGeometry`, with 24 tests
+beside the one that loads the library, the pinned hash of three stamps among them, read on Linux and
+held on Windows and macOS by the workflow. N 4.11's test, `CommentWidthTests`, reads every comment
+line of the sources the repository keeps, and failed on the skeleton's four lines before they were
+wrapped. `build/reading.cs` draws a recipe's tiles on the CPU, laid out by Tools' `sheet.py`, and
+the reading is `2026-11-18-item-3-stamps.webp`. AGENTS.md's devlog row takes its link and its build
+row names the program. The strict build is clean and the tests pass, 25 where there was 1 (dotnet
+test Landscape.Tests).

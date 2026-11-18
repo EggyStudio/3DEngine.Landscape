@@ -17,7 +17,7 @@ module.
 | [.github/COMMITS.md](.github/COMMITS.md) | How and when work is committed |
 | [.github/REVIEW.md](.github/REVIEW.md) | Direction from the reviewing session, which comes before any other order of work |
 | [.github/NORM.md](.github/NORM.md) | The numbered rules the module keeps, each with what checks it, the same text in the six module repositories |
-| `DEVLOG.md` | What landed by day, with the pictures `.github/assets/readings` keeps, generated from them and the history |
+| [DEVLOG.md](DEVLOG.md) | What landed by day, with the pictures `.github/assets/readings` keeps, generated from them and the history |
 
 ## Building and testing
 
@@ -36,7 +36,7 @@ runs the tests on Linux, Windows and macOS on every push (NORM.md, N 6.1 and N 6
 | `.github` | The documents above but the README, and the build workflow |
 | `Landscape` | The library, `Landscape.csproj` |
 | `Landscape.Tests` | The xunit tests of the library |
-| `build` | The version, `version.txt`'s major and minor set by hand and `version.sh`, which prints it with the patch counted from the history |
+| `build` | The version, `version.txt`'s major and minor set by hand and `version.sh`, which prints it with the patch counted from the history, and `reading.cs`, which draws a recipe's field on the CPU for a reading |
 
 ## Conventions
 

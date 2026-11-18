@@ -1,0 +1,158 @@
+#:project ../Landscape/Landscape.csproj
+#:property PublishAot=false
+// Draws a recipe's field on the CPU as the pictures a reading is made of, each a PNG of the
+// module's own tiles lit from one side on a white ground, which Tools' sheet.py lays out with a
+// title and labels. It opens no window and uses no GPU.
+//
+//   dotnet run build/reading.cs -- <folder> <recipe>
+//
+// The recipe is one of the names below. It writes <recipe>-oblique.png, the field seen from its
+// corner of least X and greatest Z at 35 degrees down, and <recipe>-above.png, seen from straight
+// above with X to the right and Z down the picture, each lit by a sun 33 degrees high from the
+// corner of least X and Z, the top left seen from above.
+using System.IO.Compression;
+using System.Numerics;
+using Landscape;
+
+var recipes = new Dictionary<string, Recipe>
+{
+    // The tests' three stamps (Landscape.Tests/Fields.cs), a dome, a plateau flattened into it and
+    // a crater added over the corner.
+    ["stamps"] = new(129, 129, 1f,
+    [
+        new Stamp(StampShape.Dome, new(-10f, 5f), 45f, 18f),
+        new Stamp(StampShape.Plateau, new(20f, -15f), 25f, 8f, StampBlend.Replace),
+        new Stamp(StampShape.Crater, new(55f, 50f), 30f, 6f),
+    ]),
+};
+
+if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
+{
+    Console.Error.WriteLine($"Usage: dotnet run build/reading.cs -- <folder> <{string.Join('|', recipes.Keys)}>");
+    return 2;
+}
+
+Directory.CreateDirectory(args[0]);
+var tiles = LandscapeGeometry.Tiles(recipe.Build());
+var sun = Vector3.Normalize(new Vector3(-0.6f, 0.55f, -0.6f));
+foreach (var (view, yaw, pitch, wide) in new[] { ("oblique", 45f, 35f, 720), ("above", 0f, 90f, 440) })
+{
+    var path = Path.Combine(args[0], $"{args[1]}-{view}.png");
+    WritePng(path, Draw(tiles, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide));
+    Console.WriteLine(path);
+}
+
+return 0;
+
+// The tiles' triangles drawn by a depth buffer in an orthographic view turned about up by the yaw
+// and tipped down by the pitch, each pixel lit by its corners' normals, on white.
+static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> tiles, float yaw, float pitch, Vector3 sun, int width)
+{
+    var turn = Matrix4x4.CreateRotationY(yaw) * Matrix4x4.CreateRotationX(pitch);
+    var corners = tiles.Select(tile => tile.Positions.Select(p => Vector3.Transform(p, turn)).ToArray()).ToArray();
+    var all = corners.SelectMany(c => c).ToArray();
+    var (left, right) = (all.Min(p => p.X), all.Max(p => p.X));
+    var (bottom, top) = (all.Min(p => p.Y), all.Max(p => p.Y));
+    const int margin = 16;
+    var scale = (width - 2 * margin) / (right - left);
+    var height = (int)MathF.Ceiling((top - bottom) * scale) + 2 * margin;
+    var depth = new float[width * height];
+    Array.Fill(depth, float.NegativeInfinity);
+    var rgb = new byte[width * height * 3];
+    Array.Fill(rgb, (byte)255);
+    // A dry ground's color, so the white ground around the field stays apart from its lit faces.
+    var ground = new Vector3(0.62f, 0.55f, 0.42f);
+
+    for (var t = 0; t < tiles.Count; t++)
+    {
+        var (tile, turned) = (tiles[t], corners[t]);
+        var screen = turned.Select(p => new Vector3(margin + (p.X - left) * scale, margin + (top - p.Y) * scale, p.Z)).ToArray();
+        for (var i = 0; i < tile.Indices.Length; i += 3)
+        {
+            var (a, b, c) = (tile.Indices[i], tile.Indices[i + 1], tile.Indices[i + 2]);
+            var (pa, pb, pc) = (screen[a], screen[b], screen[c]);
+            var area = Edge(pa, pb, pc);
+            if (area == 0f) continue;
+            var (x0, x1) = ((int)MathF.Max(0, MathF.Floor(MathF.Min(pa.X, MathF.Min(pb.X, pc.X)))), (int)MathF.Min(width - 1, MathF.Ceiling(MathF.Max(pa.X, MathF.Max(pb.X, pc.X)))));
+            var (y0, y1) = ((int)MathF.Max(0, MathF.Floor(MathF.Min(pa.Y, MathF.Min(pb.Y, pc.Y)))), (int)MathF.Min(height - 1, MathF.Ceiling(MathF.Max(pa.Y, MathF.Max(pb.Y, pc.Y)))));
+            for (var y = y0; y <= y1; y++)
+            {
+                for (var x = x0; x <= x1; x++)
+                {
+                    var p = new Vector3(x + 0.5f, y + 0.5f, 0f);
+                    var (wa, wb, wc) = (Edge(pb, pc, p) / area, Edge(pc, pa, p) / area, Edge(pa, pb, p) / area);
+                    if (wa < 0f || wb < 0f || wc < 0f) continue;
+                    var z = wa * pa.Z + wb * pb.Z + wc * pc.Z;
+                    // The view looks down the turned frame's negative Z, so the nearest is the
+                    // largest.
+                    if (z <= depth[y * width + x]) continue;
+                    depth[y * width + x] = z;
+                    var normal = Vector3.Normalize(wa * tile.Normals[a] + wb * tile.Normals[b] + wc * tile.Normals[c]);
+                    var lit = ground * (0.3f + 0.7f * MathF.Max(0f, Vector3.Dot(normal, sun)));
+                    var at = (y * width + x) * 3;
+                    (rgb[at], rgb[at + 1], rgb[at + 2]) = (Byte(lit.X), Byte(lit.Y), Byte(lit.Z));
+                }
+            }
+        }
+    }
+
+    return (width, height, rgb);
+}
+
+static float Edge(Vector3 a, Vector3 b, Vector3 p) => (b.X - a.X) * (p.Y - a.Y) - (b.Y - a.Y) * (p.X - a.X);
+
+// A linear share as an sRGB byte, by sRGB's own curve.
+static byte Byte(float linear)
+{
+    var v = Math.Clamp(linear, 0f, 1f);
+    var encoded = v <= 0.0031308f ? 12.92f * v : 1.055f * MathF.Pow(v, 1f / 2.4f) - 0.055f;
+    return (byte)MathF.Round(255f * encoded);
+}
+
+// A PNG of 8-bit RGB, each row with no filter, deflated whole.
+static void WritePng(string path, (int Width, int Height, byte[] Rgb) picture)
+{
+    using var file = File.Create(path);
+    file.Write([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    var header = new byte[13];
+    System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(header, picture.Width);
+    System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(header.AsSpan(4), picture.Height);
+    (header[8], header[9]) = (8, 2);
+    Chunk(file, "IHDR", header);
+    using var packed = new MemoryStream();
+    using (var deflate = new ZLibStream(packed, CompressionLevel.SmallestSize, leaveOpen: true))
+    {
+        for (var y = 0; y < picture.Height; y++)
+        {
+            deflate.WriteByte(0);
+            deflate.Write(picture.Rgb, y * picture.Width * 3, picture.Width * 3);
+        }
+    }
+
+    Chunk(file, "IDAT", packed.ToArray());
+    Chunk(file, "IEND", []);
+}
+
+static void Chunk(Stream file, string kind, byte[] data)
+{
+    Span<byte> word = stackalloc byte[4];
+    System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(word, data.Length);
+    file.Write(word);
+    var named = System.Text.Encoding.ASCII.GetBytes(kind).Concat(data).ToArray();
+    file.Write(named);
+    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(word, Crc(named));
+    file.Write(word);
+}
+
+// The CRC-32 a PNG chunk ends with, over its kind and its data.
+static uint Crc(byte[] bytes)
+{
+    var crc = 0xFFFFFFFFu;
+    foreach (var b in bytes)
+    {
+        crc ^= b;
+        for (var k = 0; k < 8; k++) crc = (crc & 1) != 0 ? 0xEDB88320u ^ (crc >> 1) : crc >> 1;
+    }
+
+    return ~crc;
+}
