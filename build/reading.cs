@@ -42,6 +42,11 @@ var recipes = new Dictionary<string, Recipe>
     // near corner, every point near, every fourth beyond and every sixteenth far, with skirts.
     ["distance"] = Distance(),
     ["distance-bare"] = Distance(),
+    // The distance recipe's field drawn whole at every point, at every 16th lit by its corners'
+    // normals, and at every 16th lit by the normal map, the far-off tile's two lightings.
+    ["far-fine"] = Distance(),
+    ["far-corners"] = Distance(),
+    ["far-mapped"] = Distance(),
     // A drawn picture of a ridge with a valley across it, 64 by 32 texels, stamped over 80 by 40 m
     // on noise and faded in over 8 m, and the same added over a dome.
     ["picture"] = new(129, 129, 1f,
@@ -73,7 +78,33 @@ if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 
 Directory.CreateDirectory(args[0]);
 var field = recipe.Build(new DrawnPictures());
-var tiles = args[1].StartsWith("distance", StringComparison.Ordinal) ? Distant(field, skirted: args[1] == "distance") : LandscapeGeometry.Tiles(field);
+var tiles = args[1] switch
+{
+    "distance" or "distance-bare" => Distant(field, skirted: args[1] == "distance"),
+    "far-corners" or "far-mapped" => LandscapeGeometry.Tiles(field, step: 16, skirt: LandscapeGeometry.SkirtDepth(field, coarsest: 16)),
+    _ => LandscapeGeometry.Tiles(field),
+};
+
+// The far-mapped recipe lights each pixel by the normal map at its place, bilinear between the
+// texels, where every other recipe lights it by its triangle's corners' normals.
+var normals = args[1] == "far-mapped" ? NormalMap.Of(field) : null;
+Vector3? NormalAt(Vector3 place)
+{
+    if (normals is null) return null;
+    var x = Math.Clamp(place.X / field.Spacing + (field.Columns - 1) * 0.5f, 0f, field.Columns - 1.001f);
+    var z = Math.Clamp(place.Z / field.Spacing + (field.Rows - 1) * 0.5f, 0f, field.Rows - 1.001f);
+    var (c, r) = ((int)x, (int)z);
+    var (u, v) = (x - c, z - r);
+    Vector3 Texel(int column, int row)
+    {
+        var at = (row * field.Columns + column) * 4;
+        return new Vector3(normals.Texels[at], normals.Texels[at + 1], normals.Texels[at + 2]) / 127.5f - Vector3.One;
+    }
+
+    var near = Vector3.Lerp(Texel(c, r), Texel(c + 1, r), u);
+    var far = Vector3.Lerp(Texel(c, r + 1), Texel(c + 1, r + 1), u);
+    return Vector3.Normalize(Vector3.Lerp(near, far, v));
+}
 var splat = args[1] is "splat" or "placement" ? SplatMap.Of(field, rules) : null;
 
 // The placement recipe's trees, a place every 1.5 m jittered from a hash of its number, kept on
@@ -121,7 +152,7 @@ var sun = Vector3.Normalize(new Vector3(-0.6f, 0.55f, -0.6f));
 foreach (var (view, yaw, pitch, wide) in new[] { ("oblique", 45f, 35f, 720), ("above", 0f, 90f, 440) })
 {
     var path = Path.Combine(args[0], $"{args[1]}-{view}.png");
-    WritePng(path, Draw(tiles, Tint, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide));
+    WritePng(path, Draw(tiles, Tint, NormalAt, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide));
     Console.WriteLine(path);
 }
 
@@ -219,7 +250,7 @@ static (int Width, int Height, byte[] Rgb) Contours(Heightfield field, int width
 
 // The tiles' triangles drawn by a depth buffer in an orthographic view turned about up by the yaw
 // and tipped down by the pitch, each pixel lit by its corners' normals, on white.
-static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> tiles, Func<Vector3, Vector3> tint, float yaw, float pitch, Vector3 sun, int width)
+static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> tiles, Func<Vector3, Vector3> tint, Func<Vector3, Vector3?> normalAt, float yaw, float pitch, Vector3 sun, int width)
 {
     var turn = Matrix4x4.CreateRotationY(yaw) * Matrix4x4.CreateRotationX(pitch);
     var corners = tiles.Select(tile => tile.Positions.Select(p => Vector3.Transform(p, turn)).ToArray()).ToArray();
@@ -259,7 +290,8 @@ static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> til
                     // largest.
                     if (z <= depth[y * width + x]) continue;
                     depth[y * width + x] = z;
-                    var normal = Vector3.Normalize(wa * tile.Normals[a] + wb * tile.Normals[b] + wc * tile.Normals[c]);
+                    var normal = normalAt(wa * tile.Positions[a] + wb * tile.Positions[b] + wc * tile.Positions[c])
+                        ?? Vector3.Normalize(wa * tile.Normals[a] + wb * tile.Normals[b] + wc * tile.Normals[c]);
                     var ground = wa * tints[a] + wb * tints[b] + wc * tints[c];
                     var lit = ground * (0.3f + 0.7f * MathF.Max(0f, Vector3.Dot(normal, sun)));
                     var at = (y * width + x) * 3;

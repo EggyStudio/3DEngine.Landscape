@@ -175,6 +175,14 @@ int Height { get; }                                      // How many rows it has
 IReadOnlyList<float> Shares { get; }                     // The shares, a row at a time from the stamp's least Z
 float At(float u, float v);                              // The share at a place across the picture, from nothing at its first texel's middle to one at its last's along each way, bilinear between the texels
 
+class NormalMap                                          // The field's normals as a texture of RGBA bytes, a texel a point, which lights a tile drawn far off at a coarse step by the field's own normals between its corners
+int Columns { get; }                                     // How many points a row has along X, the texture's width in texels
+int Rows { get; }                                        // How many rows of points there are along Z, the texture's height in texels
+byte[] Texels { get; }                                   // The texels, four bytes each, a row at a time along X and the rows along Z
+NormalMap Of(Heightfield field);                         // Makes a field's normal map
+NormalMap Of(Heightfield field, BuildOptions options);   // Makes a field's normal map across the threads the options allow
+LandscapeArea? Update(Heightfield field, LandscapeArea area);  // Writes again the texels of a changed area and those beside it, the map holding then what a whole map of the field holds
+
 class Placement                                          // Which of the places a planting gives stand on a field, kept by a rule's ranges of height and steepness and a density map, and lifted onto the ground
 IReadOnlyList<Planted> Keep(Heightfield field, IEnumerable<(Vector3 Place, uint Seed)> places, PlacementRule rule, DensityMap? density = null);  // Keeps the places that stand on a field by a rule and a density map
 float Draw(uint seed);                                   // The number a seed draws against a place's chance, from nothing up to one

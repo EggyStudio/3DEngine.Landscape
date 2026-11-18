@@ -529,3 +529,17 @@ is its own and the same on any thread, which would move its pinned hash once; th
 to order. Tools moves to `1e1ec63` by `pin.py`, which printed that the pin moved from `4e922ea` by 2
 commits with no fact new or changed and wrote the cheatsheet and the devlog again. The tests pass,
 116 where there were 111.
+
+The second of the three in the commit carrying this line, a normal map. Its tests came first and
+failed for want of the type. `NormalMap.Of` writes the field's normal at every point as RGBA bytes,
+X, Y and Z of the field's axes in red, green and blue from minus one at 0 to one at 255 and 255 in
+alpha, a texel a point as the splat layers lie, across the threads a `BuildOptions` allows, and
+`Update` writes a change's area again with the points beside it, as the splat map's does. Four tests
+hold every texel decoding to its point's normal within a 255th, an update over a moved cone equal to
+a whole map with nothing outside the grown rectangle touched, eight threads giving one's bytes, and
+another field and an area past the field refused. The reading is
+`2026-11-18-item-3-normal-map.webp`, the field at every point, at every 16th lit by its corners'
+normals, a blur, and at every 16th lit by the map per pixel, the field's own detail with a coarse
+outline alone, drawn by `build/reading.cs`, whose drawing takes a normal a pixel. The README's table
+names the map. Tools' sheet composer moved to its own folder at Tools' head, so the sheet is
+composed by the pinned `modules/Tools/scripts/sheet.py`. The tests pass, 120 where there were 116.

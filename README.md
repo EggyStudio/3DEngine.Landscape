@@ -19,6 +19,7 @@ the one interface it declares, `ILandscapePictures`, where it binds the module.
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
 | `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
 | `PictureStamp` | A picture's heights pressed in over a rectangle, a share of its height a texel, drawn toward by a blend and faded in over an edge, the picture a `HeightPicture` the engine reads through `ILandscapePictures` |
+| `NormalMap` | The field's normals as RGBA bytes, a texel a point, the way up in the field's axes from minus one at 0 to one at 255, written again over a change, which lights a tile drawn far off at the field's own detail |
 | `Placement`, `PlacementRule`, `DensityMap` | The places a planting gives, as a place and a seed each, kept by a rule's ranges of height and steepness and a density map, painted or taken from a splat material, and lifted onto the ground as `Planted` with the ground's normal |
 | `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field, indices and its bounds, at a step of every point or coarser with a skirt below its edges for a tile drawn far off |
 
@@ -31,7 +32,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture|distance|distance-bare>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture|distance|distance-bare|far-fine|far-corners|far-mapped>
 ```
 
 `build/bench.cs` builds a recipe of every step at 513, 1,025, 2,049 and 4,097 points a side and

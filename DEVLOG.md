@@ -58,6 +58,12 @@ at a time with the blocks taking turns of 64 droplets, oblique, in contours and 
 their difference four times, the hills, the count of their gullies and the plains alike and the
 difference darkest along single gullies, which run in other places.
 
+![](.github/assets/readings/2026-11-18-item-3-normal-map.webp)
+Noise and a cone on 257 by 257 points drawn at every point, at every 16th point lit by its tiles'
+corners' normals, where the ridges between the corners blur into one slope, and at every 16th lit by
+the normal map sampled per pixel, where the field's own detail stands on the coarse tiles and the
+outline alone is coarse.
+
 # The cost of a build by step
 
 An every-step recipe built at 513, 1,025, 2,049 and 4,097 points a side, a step at a time through a
@@ -188,6 +194,8 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `9c9e44c` A build shares the rows of every step whose points are reckoned alone among the threads
+  its options allow, the same bits at any count, and reports each step it applies.
 - `f1cf785` The droplets run a block of the field at a time in turns, so at 4,097 points a side they
   cost 403 ns a point where drawn anywhere they cost 642, and the eroded field differs in where each
   gully runs alone.
