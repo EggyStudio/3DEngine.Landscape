@@ -32,6 +32,9 @@ var recipes = new Dictionary<string, Recipe>
     // Noise with a steep cone over it, before and after thermal erosion at 31 degrees.
     ["erosion-before"] = Erosion(eroded: false),
     ["erosion-after"] = Erosion(eroded: true),
+    // Noise and two hills, before and after 150,000 droplets of hydraulic erosion.
+    ["droplets-before"] = Droplets(eroded: false),
+    ["droplets-after"] = Droplets(eroded: true),
     // The tests' ground of three stamps, noise and a steep cone (Landscape.Tests/SplatTests.cs),
     // drawn in the colors of the splat map's four materials.
     ["splat"] = new(129, 129, 1f,
@@ -89,6 +92,14 @@ var contours = Path.Combine(args[0], $"{args[1]}-contours.png");
 WritePng(contours, Contours(field, 440, 1f));
 Console.WriteLine(contours);
 return 0;
+
+static Recipe Droplets(bool eroded) => new(193, 193, 1f,
+[
+    new Noise(12, 80f, 7, 10f, 0.55f),
+    new Stamp(StampShape.Dome, new(-30f, -20f), 60f, 40f),
+    new Stamp(StampShape.Cone, new(45f, 40f), 40f, 30f),
+    .. eroded ? new LandscapeStep[] { new HydraulicErosion(8, 150_000) } : [],
+]);
 
 static Recipe Erosion(bool eroded) => new(129, 129, 1f,
 [

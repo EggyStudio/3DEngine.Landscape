@@ -13,7 +13,7 @@ implements the interfaces it declares where it binds the module.
 | `Heightfield` | Heights in meters on a grid of points, columns along X and rows along Z with Y up about the field's middle, sampled anywhere for a height, a normal and a slope |
 | `Recipe` | A field's size and its ordered steps, built from flat ground each time |
 | `Stamp` | A shape, `StampShape`, pressed in at a place with a radius and a height and met by a blend, `StampBlend` |
-| `Noise`, `Terrace`, `Smoothing`, `ThermalErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur and ground slumping to its talus |
+| `Noise`, `Terrace`, `Smoothing`, `ThermalErosion`, `HydraulicErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur, ground slumping to its talus, and droplets from a seed cutting channels and filling the feet of slopes |
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
 | `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
 | `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field and indices |
@@ -27,7 +27,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|splat>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat>
 ```
 
 ## Taking it into an engine

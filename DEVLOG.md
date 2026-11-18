@@ -25,6 +25,13 @@ The splat map's four materials over three stamps, noise and a steep cone, sand b
 12 m, rock above a steepness of 0.7 and snow above 14 m, each blending into the next and blended in
 the picture by their weights, oblique, from above and in contours.
 
+![](.github/assets/readings/2026-11-18-item-3-droplets.webp)
+Noise, a dome of 40 m and a cone of 30 m on 193 by 193 points before hydraulic erosion, after
+150,000 droplets reckoned against 40 m with the edge worn by every droplet leaving over it and
+filled by none, which dug pits without end, and after the same droplets with the edge held as the
+base level, which cuts gullies down both hills and fills their feet, oblique, lit from above and in
+contours of a meter.
+
 ## 2026-10-31
 
 Done that day

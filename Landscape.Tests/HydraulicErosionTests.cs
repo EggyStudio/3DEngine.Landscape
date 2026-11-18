@@ -1,0 +1,124 @@
+using System.Numerics;
+using Xunit;
+
+namespace Landscape.Tests;
+
+public class HydraulicErosionTests
+{
+    // A cone of 30 m over 40 m on noise, 129 by 129 points a meter apart.
+    private static Recipe Cone(int droplets) => new(129, 129, 1f,
+    [
+        new Noise(6, 32f, 4, 1f),
+        new Stamp(StampShape.Cone, Vector2.Zero, 40f, 30f),
+        .. droplets > 0 ? new LandscapeStep[] { new HydraulicErosion(3, droplets) } : [],
+    ]);
+
+    [Fact]
+    public void Droplets_Give_The_Same_Bits_For_A_Seed_On_Every_System()
+    {
+        var first = Cone(20_000).Build();
+
+        Assert.Equal(first.Heights, Cone(20_000).Build().Heights);
+        Assert.Equal(PinnedDroplets, Fields.Hash(first));
+    }
+
+    [Fact]
+    public void Droplets_Wear_The_Flanks_Down_And_Fill_The_Foot()
+    {
+        var (before, after) = (Cone(0).Build(), Cone(20_000).Build());
+
+        // The flank between 10 and 30 m from the middle and the foot between 36 and 50 m, summed.
+        double Ring(Heightfield field, float near, float far)
+        {
+            var sum = 0.0;
+            for (var row = 0; row < field.Rows; row++)
+            {
+                for (var column = 0; column < field.Columns; column++)
+                {
+                    var distance = field.Place(column, row).Length();
+                    if (distance >= near && distance < far) sum += field[column, row];
+                }
+            }
+
+            return sum;
+        }
+
+        Assert.True(Ring(after, 10f, 30f) < Ring(before, 10f, 30f) - Worn, "The flank was not worn down.");
+        Assert.True(Ring(after, 36f, 50f) > Ring(before, 36f, 50f) + Worn, "The foot was not filled.");
+        Assert.True(after.Heights.Max() <= before.Heights.Max() + 0.01f, "A droplet raised the peak.");
+    }
+
+    [Fact]
+    public void A_Closed_Bowl_Keeps_Its_Volume()
+    {
+        // A hollow dome as wide as the field with a cone in it, whose droplets all run inward and
+        // none off the edge.
+        var recipe = new Recipe(65, 65, 1f,
+        [
+            new Stamp(StampShape.Dome, Vector2.Zero, 46f, -20f),
+            new Stamp(StampShape.Cone, new(6f, -4f), 14f, 10f),
+        ]);
+        var before = recipe.Build();
+        var after = before.Copy();
+        new HydraulicErosion(5, 5_000).Apply(after);
+
+        Assert.NotEqual(before.Heights, after.Heights);
+        Assert.Equal(before.Heights.Sum(h => (double)h), after.Heights.Sum(h => (double)h), VolumeTolerance);
+    }
+
+    [Fact]
+    public void Ground_Draining_Off_The_Edge_Is_Not_Dug_Below_It()
+    {
+        // A ramp falling a meter in ten toward the first column, with noise, which every droplet
+        // runs off, a valley's mouth at the field's edge.
+        var ramp = new Heightfield(129, 33, 1f);
+        for (var row = 0; row < ramp.Rows; row++)
+        {
+            for (var column = 0; column < ramp.Columns; column++) ramp[column, row] = 0.1f * column;
+        }
+
+        new Noise(2, 16f, 3, 0.5f).Apply(ramp);
+        var edge = Enumerable.Range(0, ramp.Rows).Min(row => ramp[0, row]);
+        new HydraulicErosion(4, 20_000).Apply(ramp);
+
+        Assert.True(ramp.Heights.Min() >= edge - BelowEdge, $"The ground was dug to {ramp.Heights.Min()}, {edge - ramp.Heights.Min()} m below the edge's lowest point.");
+    }
+
+    [Fact]
+    public void Level_Ground_Stays_Level()
+    {
+        var field = new Heightfield(33, 33, 1f);
+        new HydraulicErosion(1, 2_000).Apply(field);
+
+        Assert.All(field.Heights, height => Assert.Equal(0f, height));
+    }
+
+    [Fact]
+    public void Hydraulic_Erosion_Refuses_What_It_Cannot_Do()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>("Droplets", () => new HydraulicErosion(1, 0));
+        Assert.Throws<ArgumentOutOfRangeException>("Lifetime", () => new HydraulicErosion(1, 1, lifetime: 0));
+        Assert.Throws<ArgumentOutOfRangeException>("Inertia", () => new HydraulicErosion(1, 1, inertia: 1f));
+        Assert.Throws<ArgumentOutOfRangeException>("Capacity", () => new HydraulicErosion(1, 1, capacity: 0f));
+        Assert.Throws<ArgumentOutOfRangeException>("Deposition", () => new HydraulicErosion(1, 1, deposition: 1.5f));
+        Assert.Throws<ArgumentOutOfRangeException>("Evaporation", () => new HydraulicErosion(1, 1, evaporation: 1f));
+        Assert.Throws<ArgumentOutOfRangeException>("Radius", () => new HydraulicErosion(1, 1, radius: 9));
+    }
+
+    // 20,000 droplets on Linux wore the flank from 34,529 cubic meters to 28,594 and filled the
+    // foot from 1,552 to 7,094, so a sixth of either is asked, and the closed bowl's 39,313.020
+    // cubic meters were 39,313.018 after 5,000 droplets, the float sums of their moves rounding
+    // apart by 0.002, so the tolerance is some twice that.
+    // On Linux, 20,000 droplets wore the cone's flank from 34,529 cubic meters to 27,618 and filled
+    // its foot from 1,552 to 7,497, so a sixth of either is asked. The closed bowl's 39,313.0203
+    // cubic meters were 39,313.0197 after 5,000 droplets, the float sums of their moves rounding
+    // apart by 0.0007. The ramp was dug 0.009 m below its edge's lowest point, where it was 16.4 m
+    // with the edge worn and never filled. Each tolerance is some twice what was read.
+    private const float BelowEdge = 0.02f;
+    private const double Worn = 1_000;
+    private const double VolumeTolerance = 0.002;
+
+    // The hash of the cone's heights after 20,000 droplets, read on Linux at the commit that wrote
+    // these tests and held on Windows and macOS by the build workflow.
+    private const ulong PinnedDroplets = 9667194681003907309ul;
+}

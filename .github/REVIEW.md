@@ -275,3 +275,20 @@ lines. After an edit that moves a cone the host holds the same tiles, splat laye
 host bound to the edited recipe from nothing, so the tiles a change reaches are every tile it
 changes, and the edit made 4 of the 16 tiles again, the four its places span. The README's comment
 in the block is wrapped so it holds to 100 columns where the host indents it. The tests pass, 56.
+
+Hydraulic erosion in the commit carrying this line, the next part in the order after the three.
+`HydraulicErosion` runs droplets one after another by Beyer's rule of 2015 from the module's PCG,
+with addition, multiplication, division and square root alone. Two faults showed on the sheet.
+Beyer's numbers are given for heights from nothing to one, and in meters a droplet's speed and
+capacity grew past any fall and wore hills of 40 m to plains, so the step takes a scale, 40 m by
+default, that its fall is reckoned against for capacity and speed, read from the trial of 10, 40 and
+160 m in the dump with no test of its own, since it is a tuning. And the field's edge was worn by
+every droplet that left over it and filled by none, which dug pits hundreds of meters deep and
+deeper with each droplet their slopes drew, a ramp draining off its edge dug 16.4 m below it; the
+edge points are held as the base level, which no droplet wears or fills, and the ramp's test, which
+failed so before the mend, reads 0.009 m. Six tests come with it, the pinned hash of 20,000 droplets
+on a cone, the flank worn by 6,911 cubic meters and the foot filled by 5,945, a closed bowl's volume
+to 0.0007, the ramp, level ground staying level and the refusals. 150,000 droplets over 193 by 193
+points still wear the hills far lower, so the count is the strength. The reading is
+`2026-11-18-item-3-droplets.webp`, before, the edge worn and the edge held. The strict build is
+clean and the tests pass, 62 where there were 56.
