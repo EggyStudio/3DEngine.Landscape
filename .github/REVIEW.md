@@ -267,3 +267,11 @@ layers as linear weights, no light or color, and the threads. It gives the corne
 left-handed one and a left-handed Z-up one takes and which of them reverse the winding, the
 half-texel a splat layer is sampled with, and the smallest binding, three calls of the engine's own,
 which the next commit's host runs as written.
+
+The owner's second point in the commit carrying this line. `BindingTests` holds a host with no
+engine whose three calls keep copies of what they are given, and runs the README's smallest binding
+word for word between two markers, a second test reading the README's block back against those
+lines. After an edit that moves a cone the host holds the same tiles, splat layer and heights as a
+host bound to the edited recipe from nothing, so the tiles a change reaches are every tile it
+changes, and the edit made 4 of the 16 tiles again, the four its places span. The README's comment
+in the block is wrapped so it holds to 100 columns where the host indents it. The tests pass, 56.

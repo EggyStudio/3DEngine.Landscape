@@ -10,7 +10,7 @@ public class CommentWidthTests
     [Fact]
     public void Every_Comment_Line_Holds_To_100_Columns()
     {
-        var root = Root();
+        var root = Fields.Root();
         var found = new List<string>();
         foreach (var path in Sources(root))
         {
@@ -60,16 +60,5 @@ public class CommentWidthTests
                 if (kinds.Contains(Path.GetExtension(file))) yield return file;
             }
         }
-    }
-
-    // The repository's root, the folder above the tests' output that holds the solution.
-    private static string Root()
-    {
-        for (var folder = new DirectoryInfo(AppContext.BaseDirectory); folder is not null; folder = folder.Parent)
-        {
-            if (File.Exists(Path.Combine(folder.FullName, "Landscape.slnx"))) return folder.FullName;
-        }
-
-        throw new InvalidOperationException($"No Landscape.slnx above {AppContext.BaseDirectory}.");
     }
 }

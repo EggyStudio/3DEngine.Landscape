@@ -98,8 +98,8 @@ for (var layer = 0; layer < splat.Layers.Count; layer++)
     engine.SplatLayer(layer, splat.Columns, splat.Rows, splat.Layers[layer]);
 engine.CollisionHeights(field.Columns, field.Rows, field.Spacing, field.Heights);
 
-// After an edit, the tiles the change reached are made again and the rest kept, and the splat
-// layers and the heights, which are the whole field's, are given again.
+// After an edit, the tiles the change reached are made again and the rest kept, and
+// the splat layers and the heights, which are the whole field's, are given again.
 var change = builder.Rebuild(edited);
 field = builder.Field;
 if (change.Changed is { } area)

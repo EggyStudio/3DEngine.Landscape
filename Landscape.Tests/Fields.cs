@@ -20,6 +20,17 @@ internal static class Fields
         return hash;
     }
 
+    // The repository's root, the folder above the tests' output that holds the solution.
+    public static string Root()
+    {
+        for (var folder = new DirectoryInfo(AppContext.BaseDirectory); folder is not null; folder = folder.Parent)
+        {
+            if (File.Exists(Path.Combine(folder.FullName, "Landscape.slnx"))) return folder.FullName;
+        }
+
+        throw new InvalidOperationException($"No Landscape.slnx above {AppContext.BaseDirectory}.");
+    }
+
     // Three stamps that overlap and reach past the edge, a dome, a plateau flattened into it and a
     // crater added at the corner, on a field of 129 by 129 points a meter apart.
     public static Recipe ThreeStamps() => new(129, 129, 1f,
