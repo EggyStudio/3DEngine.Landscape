@@ -11,7 +11,7 @@ implements the interfaces it declares where it binds the module.
 | Type | What it is |
 |---|---|
 | `Heightfield` | Heights in meters on a grid of points, columns along X and rows along Z with Y up about the field's middle, sampled anywhere for a height, a normal and a slope |
-| `Recipe` | A field's size and its ordered steps, built from flat ground each time |
+| `Recipe` | A field's size and its ordered steps, each a `LandscapeStep`, a stamp or an operation of the module's, built from flat ground each time |
 | `Stamp` | A shape, `StampShape`, pressed in at a place with a radius and a height and met by a blend, `StampBlend` |
 | `Noise`, `Terrace`, `Smoothing`, `ThermalErosion`, `HydraulicErosion` | The procedural operations, fractal gradient noise from a seed, terraces with a flat tread, a binomial blur, ground slumping to its talus, and droplets from a seed cutting channels and filling the feet of slopes |
 | `LandscapeBuilder` | A recipe built and built again after each change from the first step that changed, each rebuild giving a `LandscapeChange` with the `LandscapeArea` of points it changed and the tiles that reaches |
@@ -119,7 +119,9 @@ if (change.Changed is { } area)
 
 ## Building and testing
 
-With the .NET 10 SDK:
+The tests take the checks every module keeps from the Tools module, a git submodule under
+`modules/Tools`, so a clone fetches it with `git clone --recurse-submodules`, or with
+`git submodule update --init` in a clone made without it. With the .NET 10 SDK:
 
 ```bash
 dotnet build Landscape.slnx

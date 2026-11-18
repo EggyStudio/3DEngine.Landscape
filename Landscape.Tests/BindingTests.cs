@@ -4,7 +4,8 @@ using Xunit;
 namespace Landscape.Tests;
 
 // The README's smallest binding run against a host with no engine, whose three calls keep what they
-// are given, so the build proves the guide a stranger binds the module by.
+// are given, so the build proves the guide a stranger binds the module by, ModuleTests holding the
+// README's block to the lines between the markers.
 public class BindingTests
 {
     [Fact]
@@ -36,24 +37,6 @@ public class BindingTests
         Assert.Equal(16 + 4, engine.TilesMade);
     }
 
-    [Fact]
-    public void The_Readme_Shows_The_Binding_The_Host_Runs()
-    {
-        var readme = File.ReadAllLines(Path.Combine(Fields.Root(), "README.md"));
-        var heading = Array.IndexOf(readme, "### The smallest binding");
-        var start = Array.IndexOf(readme, "```csharp", heading) + 1;
-        var shown = readme[start..Array.IndexOf(readme, "```", start)];
-
-        var host = File.ReadAllLines(Path.Combine(Fields.Root(), "Landscape.Tests", "BindingTests.cs"));
-        var begin = Array.FindIndex(host, line => line.Trim() == "// The README's binding begins.") + 1;
-        var end = Array.FindIndex(host, line => line.Trim() == "// The README's binding ends.");
-        var indent = host[begin].Length - host[begin].TrimStart().Length;
-        var run = host[begin..end].Select(line => line.Length > indent ? line[indent..] : line.Trim()).ToArray();
-
-        Assert.True(heading >= 0 && start > heading && end > begin, "The README or the host lost its markers.");
-        Assert.Equal(shown, run);
-    }
-
     private static readonly SplatRule[] Rules =
     [
         new("grass", mostSteep: 0.5f, steepBlend: 0.2f),
@@ -66,10 +49,10 @@ public class BindingTests
         new Stamp(StampShape.Cone, cone, 8f, 6f),
     ]);
 
-    // The README's code, word for word between the markers, which the test above reads back.
+    // The README's code, word for word between the markers, which ModuleTests reads back.
     private static void Bind(Host engine, Recipe recipe, SplatRule[] rules, Recipe edited)
     {
-        // The README's binding begins.
+        // The README's block from here
         var builder = new LandscapeBuilder(recipe);
         var field = builder.Field;
         foreach (var tile in LandscapeGeometry.Tiles(field))
@@ -96,7 +79,7 @@ public class BindingTests
                 engine.SplatLayer(layer, splat.Columns, splat.Rows, splat.Layers[layer]);
             engine.CollisionHeights(field.Columns, field.Rows, field.Spacing, field.Heights);
         }
-        // The README's binding ends.
+        // The end marker.
     }
 
     // An engine's three calls, each keeping a copy of what it was given as a renderer and a physics

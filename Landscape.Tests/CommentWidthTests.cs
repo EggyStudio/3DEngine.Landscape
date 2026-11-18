@@ -46,7 +46,7 @@ public class CommentWidthTests
     private static IEnumerable<string> Sources(string root)
     {
         string[] kinds = [".cs", ".csproj", ".props", ".targets", ".slnx", ".yml", ".sh", ".py"];
-        string[] skipped = ["bin", "obj", ".git", ".ref", "dump", "TestResults"];
+        string[] skipped = ["bin", "obj", ".git", ".ref", "dump", "TestResults", "modules"];
         var pending = new Stack<string>([root]);
         while (pending.TryPop(out var folder))
         {

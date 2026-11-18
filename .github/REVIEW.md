@@ -301,3 +301,14 @@ and leave 330, and a dome of 160 m against 160 m keeps 85.56 and leaves 266, so 
 clean gullies against a pitted ground and a share of the peak, and a hill against its own height
 erodes alike at either size. The test holds both domes to 84 hundredths of their peaks and 500 pits
 at most, and the scale's remarks say so. The tests pass, 64.
+
+Tools' shared checks in the commit carrying this line, after Levels' trial. The repository takes
+Tools as a submodule at `modules/Tools` pinned at `f92df1c`, the test project references it with
+the `NeedsTools` target that stops a clone without it, the workflow checks submodules out, and
+`ModuleTests` holds the README's four facts with `Library`, `Root` and `Host` set above them. The
+host's markers are Tools' two lines. The local check of the README's block against the host goes,
+since the fourth fact holds it, and the comment width test stays, since Tools holds none, and skips
+`modules/` so it reads the module's sources alone. The library and its package take nothing of
+Tools'. On the first run the references, the engine names and the binding block passed, and the
+README's naming of the public types failed on `LandscapeStep`, which no local copy checked, so the
+README's row for `Recipe` names it. AGENTS.md takes a row for `modules`. The tests pass, 67.
