@@ -196,11 +196,14 @@ uint Seed { get; init; }                                 // The seed it came wit
 
 class LandscapeGeometry                                  // A field as the triangles an engine draws, cut into square tiles so an engine culls them apart and builds again only those a change reaches
 int TileCells = 64;                                      // The number of cells along a tile's side an engine takes where it has no other
-IReadOnlyList<LandscapeMesh> Tiles(Heightfield field, int tileCells = 64);  // Cuts a field into tiles, the last of a row and a column cut to what is left
-LandscapeMesh Tile(Heightfield field, int column, int row, int tileCells = 64);  // One tile of a field, the cells from its column and row times the tile's side
+IReadOnlyList<LandscapeMesh> Tiles(Heightfield field, int tileCells = 64, int step = 1, float skirt = 0f);  // Cuts a field into tiles, the last of a row and a column cut to what is left
+LandscapeMesh Tile(Heightfield field, int column, int row, int tileCells = 64, int step = 1, float skirt = 0f);  // One tile of a field, the cells from its column and row times the tile's side
+float SkirtDepth(Heightfield field, int tileCells = 64, int coarsest = 1);  // How far a skirt hangs so tiles drawn at any steps up to the coarsest meet with no crack
+float StepError(Heightfield field, int column, int row, int step, int tileCells = 64);  // The most in meters a tile drawn at a step stands off the field's points it covers, which a binding weighs against the distance or the error on screen it accepts to pick the step
 
 record LandscapeMesh                                     // One tile of a field as triangles, in meters with Y up about the field's middle, which an engine builds a mesh of
 LandscapeMesh(int column, int row, Vector3[] positions, Vector3[] normals, Vector2[] uvs, uint[] indices);  // A tile of its column and row among the field's tiles and its corners' arrays
+(Vector3, Vector3) Bounds { get; }                       // The least and the greatest corner of the box about every corner of the tile, its skirt's among them, which an engine culls the tile by
 int Column { get; init; }                                // The tile's column among the field's tiles, from zero along X
 int Row { get; init; }                                   // The tile's row among the field's tiles, from zero along Z
 Vector3[] Positions { get; init; }                       // A corner a point of the field the tile covers, a row at a time along X and the rows along Z

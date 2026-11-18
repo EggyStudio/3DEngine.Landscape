@@ -38,6 +38,10 @@ var recipes = new Dictionary<string, Recipe>
     // The tests' ground of three stamps, noise and a steep cone (Landscape.Tests/SplatTests.cs),
     // drawn in the colors of the splat map's four materials.
     ["placement"] = Splat(),
+    // Noise and a cone on 257 by 257 points, its tiles drawn at a step by their distance from the
+    // near corner, every point near, every fourth beyond and every sixteenth far, with skirts.
+    ["distance"] = Distance(),
+    ["distance-bare"] = Distance(),
     // A drawn picture of a ridge with a valley across it, 64 by 32 texels, stamped over 80 by 40 m
     // on noise and faded in over 8 m, and the same added over a dome.
     ["picture"] = new(129, 129, 1f,
@@ -69,7 +73,7 @@ if (args.Length != 2 || !recipes.TryGetValue(args[1], out var recipe))
 
 Directory.CreateDirectory(args[0]);
 var field = recipe.Build(new DrawnPictures());
-var tiles = LandscapeGeometry.Tiles(field);
+var tiles = args[1].StartsWith("distance", StringComparison.Ordinal) ? Distant(field, skirted: args[1] == "distance") : LandscapeGeometry.Tiles(field);
 var splat = args[1] is "splat" or "placement" ? SplatMap.Of(field, rules) : null;
 
 // The placement recipe's trees, a place every 1.5 m jittered from a hash of its number, kept on
@@ -95,10 +99,16 @@ if (args[1] == "placement")
         trees.Add(((int)MathF.Round(planted.Place.X / field.Spacing + (field.Columns - 1) * 0.5f), (int)MathF.Round(planted.Place.Z / field.Spacing + (field.Rows - 1) * 0.5f)));
 }
 
-// A corner's color, the splat map's materials blended by their weights at its point, or a dry
-// ground's where the recipe has no splat map.
+// A corner's color, the splat map's materials blended by their weights at its point, the step's
+// tint of the distance recipe's tiles, or a dry ground's.
 Vector3 Tint(Vector3 corner)
 {
+    if (args[1].StartsWith("distance", StringComparison.Ordinal))
+    {
+        var step = StepAt(field, corner);
+        return step == 1 ? new Vector3(0.62f, 0.55f, 0.42f) : step == 4 ? new Vector3(0.42f, 0.52f, 0.62f) : new Vector3(0.62f, 0.42f, 0.42f);
+    }
+
     if (splat is null) return new Vector3(0.62f, 0.55f, 0.42f);
     var column = (int)MathF.Round(corner.X / field.Spacing + (field.Columns - 1) * 0.5f);
     var row = (int)MathF.Round(corner.Z / field.Spacing + (field.Rows - 1) * 0.5f);
@@ -119,6 +129,34 @@ var contours = Path.Combine(args[0], $"{args[1]}-contours.png");
 WritePng(contours, Contours(field, 440, 1f));
 Console.WriteLine(contours);
 return 0;
+
+// The distance recipe's tiles, each at the step its distance from the near corner gives, every
+// skirt hung for the coarsest of them, or none for the bare recipe that shows the cracks.
+static IReadOnlyList<LandscapeMesh> Distant(Heightfield field, bool skirted)
+{
+    var skirt = skirted ? LandscapeGeometry.SkirtDepth(field, coarsest: 16) : 0f;
+    var tiles = new List<LandscapeMesh>();
+    for (var row = 0; row < 4; row++)
+    {
+        for (var column = 0; column < 4; column++)
+            tiles.Add(LandscapeGeometry.Tile(field, column, row, step: StepOf(column, row), skirt: skirt));
+    }
+
+    return tiles;
+}
+
+// A tile's step by its distance from the near corner, the tile of least X and greatest Z.
+static int StepOf(int column, int row) => Math.Max(column, 3 - row) switch { 0 or 1 => 1, 2 => 4, _ => 16 };
+
+// The step of the tile a corner lies in, a corner on an edge taken into the nearer tile.
+static int StepAt(Heightfield field, Vector3 corner)
+{
+    var (x, z) = (corner.X / field.Spacing + 128f, corner.Z / field.Spacing + 128f);
+    var (column, row) = (Math.Min((int)(x / 64f), 3), Math.Min((int)(z / 64f), 3));
+    return StepOf(column, row);
+}
+
+static Recipe Distance() => new(257, 257, 1f, [new Noise(4, 40f, 6, 6f), new Stamp(StampShape.Cone, new(-20f, 10f), 50f, 30f)]);
 
 static Recipe Splat() => new(129, 129, 1f,
 [

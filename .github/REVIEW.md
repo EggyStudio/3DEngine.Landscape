@@ -382,3 +382,54 @@ openings and the binding section. The README opens with its link row above the t
 is one word in the row and the page's title. Tools moves to `75d77f2` with its facts of the link row
 and of the tracked text naming no engine. DEVLOG.md holds 2 days, 7 pictures and 2 items done,
 CHEATSHEET.md is regenerated, and the tests pass, 91 where there were 88.
+
+The next three, from what a stranger binding the module meets first, each opening with a test that
+fails.
+
+1. **Tiles an engine can cull and draw far off.** A field of 4,097 points a side is 16.8 million
+   corners, which no engine draws whole, and a tile gives no bounds to cull it by. `LandscapeMesh`
+   gains its bounds, and `LandscapeGeometry.Tile` takes a step, a corner every 1, 2, 4 and on up to
+   the tile's cells, with skirts, a ring of corners hung below each edge by a depth
+   `LandscapeGeometry.SkirtDepth` reckons from the field and the coarsest step, so two tiles at
+   different steps meet with no crack. The coarse corners are the field's own points, so neighbors
+   share them to the bit. Its tests come first and fail: a tile's corners at each step, its bounds
+   tight about every corner, no crack at any sample of an edge between tiles at steps 1 and 8, the
+   skirts facing outward, one index array a size and step, and the refusals of a step that does not
+   divide the tile.
+
+2. **A ray onto the ground.** An editor places a stamp where the pointer falls and a game drops what
+   falls, and neither can without a ray met with the field. `Heightfield.Raycast` walks the ray cell
+   by cell over the field and meets each cell's two triangles, the mesh's own, giving the place, the
+   distance and the normal, or nothing. Its tests fail first: a ray straight down onto a dome
+   meeting its height, a slanted ray meeting a ramp where the arithmetic puts it, a ray grazing past
+   an edge and one leaving the field missing, and the hit lying on the drawn triangles to a
+   millimeter.
+
+3. **A splat map made again over a change alone.** A rebuild at 4,097 a side makes the whole splat
+   map again in about a second, where an edit changes a few tiles. `SplatMap.Update(field, area)`
+   weighs the points of a changed area and the point beyond it, and the README's binding block
+   uploads the layers' rectangle. Its tests fail first: an update over a moved stamp's area equal to
+   a whole map of the new field to the byte, and nothing outside the area touched.
+
+The droplets' 583 ns a point at 4,097 come after them. Ordering the droplets by tile would keep the
+field in the caches, but every pinned hash of the step would move and the step runs at authoring
+time, where the three above run at every edit or every frame. The first starts now.
+
+The first of the three in the commit carrying this line, tiles an engine culls and draws far off.
+Its tests came first and failed for want of the members. `LandscapeMesh` holds its `Bounds`, the
+least and the greatest corner of the box about every corner, made in its constructor so two equal
+tiles stay equal. `LandscapeGeometry.Tile` and `Tiles` take a step, a corner every step-th point of
+the field and its last where a tile is cut short, so a coarse tile's corners are the field's own
+points with their normals and texture coordinates and two tiles at different steps share the
+coarser's corners along their edge to the bit, and a skirt, a corner below each edge corner and two
+triangles a segment facing out of the tile. `SkirtDepth` gives the skirt for the coarsest step a
+binding draws, twice the most any step up to it stands off a tile's edge and a millimeter, and
+`StepError` the most in meters a tile at a step stands off the points it covers, read against the
+triangles it draws, by which a binding picks its steps by distance or by the error on screen, as the
+README's conventions say. The indices stay one array a size, a step and a skirt. Eight tests, 11
+cases, hold the corners at four steps, the coarse corners the field's, the bounds tight, no crack at
+any of the 65 points of an edge between tiles at steps 1 and 8, the skirt's triangles facing out and
+the surface's up, the shared indices, the error against every point read under the coarse triangles,
+and the refusals. The reading is `2026-11-18-item-3-distance.webp`, tiles at steps 1, 4 and 16 by
+distance with white cracks along the borders without skirts and none with them. The tests pass, 102
+where there were 91.

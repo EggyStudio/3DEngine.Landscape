@@ -20,7 +20,7 @@ the one interface it declares, `ILandscapePictures`, where it binds the module.
 | `SplatMap` | A weight a point for each of up to eight materials by a `SplatRule` each, a range of height and of steepness with blends, summing to one, and the same as RGBA bytes four materials a layer, summing to 255 |
 | `PictureStamp` | A picture's heights pressed in over a rectangle, a share of its height a texel, drawn toward by a blend and faded in over an edge, the picture a `HeightPicture` the engine reads through `ILandscapePictures` |
 | `Placement`, `PlacementRule`, `DensityMap` | The places a planting gives, as a place and a seed each, kept by a rule's ranges of height and steepness and a density map, painted or taken from a splat material, and lifted onto the ground as `Planted` with the ground's normal |
-| `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field and indices |
+| `LandscapeGeometry` | The field cut into square tiles of triangles, each a `LandscapeMesh` of positions, normals, texture coordinates over the whole field, indices and its bounds, at a step of every point or coarser with a skirt below its edges for a tile drawn far off |
 
 A recipe gives the same heights to the bit on Linux, Windows and macOS, since its steps use only
 the arithmetic IEEE 754 rounds alike on every system, and a test holds a recipe's heights to a hash
@@ -31,7 +31,7 @@ pictures of a reading, with no window and no GPU. `--no-cache` builds the librar
 file-based program's cached build does not follow a change to a project it references:
 
 ```bash
-dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture>
+dotnet run --no-cache build/reading.cs -- <folder> <stamps|erosion-before|erosion-after|droplets-before|droplets-after|splat|placement|picture|distance|distance-bare>
 ```
 
 `build/bench.cs` builds a recipe of every step at 513, 1,025, 2,049 and 4,097 points a side and
@@ -81,6 +81,7 @@ recipe with no picture stamp needs no interface at all, as the smallest binding 
 | Heights | A row at a time, each row along X and the rows along Z, the order a physics heightfield takes |
 | Texture coordinates | U along X and V along Z, from nothing at the field's first point to one at its last |
 | Splat layers | RGBA bytes, a texel a point, four materials' weights a layer, linear values and not sRGB color |
+| Distance | A binding picks each tile's step itself, by its distance or by the error on screen it accepts, `LandscapeGeometry.StepError` giving the meters a tile at a step stands off the field's points, and hangs every tile's skirt at the depth `LandscapeGeometry.SkirtDepth` gives for the coarsest step it draws, so tiles at different steps meet with no crack |
 | Pictures | A row at a time from the stamp's least Z, each along X, the order an image file is read from its top, its gray a share of the stamp's height |
 | Recipes | JSON on a `Stream`, by `Recipe.Write` and `Recipe.Read`, format 1, each step by its kind and each number as the shortest text that reads back to the same float |
 | Light and color | None, the module holds no light, no color and no exposure |

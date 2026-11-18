@@ -47,6 +47,11 @@ An every-step recipe at 513, 1,025, 2,049 and 4,097 points a side, the fastest o
 point of each stage and the bytes a point it allocates, the tiles' 57 bytes a point with an index
 array a tile falling to 33 with one shared a size.
 
+![](.github/assets/readings/2026-11-18-item-3-distance.webp)
+Tiles of noise and a cone drawn at a step by their distance, every point near in sand, every fourth
+in blue and every sixteenth in red, with no skirts, where white cracks run along the borders between
+steps, and with skirts hung for the coarsest step, where none does.
+
 # The cost of a build by step
 
 An every-step recipe built at 513, 1,025, 2,049 and 4,097 points a side, a step at a time through a

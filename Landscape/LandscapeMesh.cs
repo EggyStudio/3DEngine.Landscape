@@ -44,7 +44,17 @@ public sealed record LandscapeMesh
     public LandscapeMesh(int column, int row, Vector3[] positions, Vector3[] normals, Vector2[] uvs, uint[] indices)
     {
         (Column, Row, Positions, Normals, Uvs, Indices) = (column, row, positions, normals, uvs, indices);
+        ArgumentNullException.ThrowIfNull(positions);
+        var (low, high) = positions.Length > 0 ? (positions[0], positions[0]) : default;
+        foreach (var corner in positions) (low, high) = (Vector3.Min(low, corner), Vector3.Max(high, corner));
+        Bounds = (low, high);
     }
+
+    /// <summary>
+    /// The least and the greatest corner of the box about every corner of the tile, its skirt's
+    /// among them, which an engine culls the tile by.
+    /// </summary>
+    public (Vector3 Low, Vector3 High) Bounds { get; }
 
     /// <summary>The tile's column among the field's tiles, from zero along X.</summary>
     public int Column { get; init; }
