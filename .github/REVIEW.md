@@ -258,3 +258,12 @@ grass, the first material where no rule reaches, five materials in two layers, t
 pinned hash of the layer's bytes. The reading is `2026-11-18-item-3-splat.webp`, drawn by
 `build/reading.cs` blending four colors by the weights. The strict build is clean and the tests
 pass, 54 where there were 47.
+
+The owner's first point in the commit carrying this line. The README's section, Binding it in your
+engine, says the module declares no interface, since it calls no renderer, window, scheduler or
+file system and gives out arrays an engine makes its own things of, and tables the conventions, the
+meter, Y up and right-handed, the winding, the heights' order, the texture coordinates, the splat
+layers as linear weights, no light or color, and the threads. It gives the corner a Z-up engine, a
+left-handed one and a left-handed Z-up one takes and which of them reverse the winding, the
+half-texel a splat layer is sampled with, and the smallest binding, three calls of the engine's own,
+which the next commit's host runs as written.
