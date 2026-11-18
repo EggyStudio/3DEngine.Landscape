@@ -32,6 +32,37 @@ public class MaskTests
     }
 
     [Fact]
+    public void A_Density_Map_Masks_A_Step_Over_The_Whole_Field_Point_By_Point()
+    {
+        // The grass of a splat map of the ground as a mask over the field's whole rectangle, whose
+        // texels fall on the field's points, so each point takes its own share of the change.
+        var plain = new Recipe(65, 33, 1f, [new Stamp(StampShape.Cone, new(-10f, 0f), 14f, 12f)]);
+        var before = plain.Build();
+        var grass = DensityMap.Of(SplatMap.Of(before, [new SplatRule("grass", mostSteep: 0.4f, steepBlend: 0.3f), new SplatRule("rock")]), 0);
+        var picture = grass.ToPicture();
+        var pictures = new Named(("grass", picture));
+        var whole = new Recipe(65, 33, 1f, [.. plain.Steps, Rough]).Build();
+        var masked = new Recipe(65, 33, 1f, [.. plain.Steps, new Masked(Rough, "grass", Vector2.Zero, before.Size)]).Build(pictures);
+
+        Assert.Equal((65, 33), (picture.Width, picture.Height));
+        for (var row = 0; row < 33; row++)
+        {
+            for (var column = 0; column < 65; column++)
+            {
+                var expected = before[column, row] + (whole[column, row] - before[column, row]) * grass.Shares[row * 65 + column];
+                // The mask reads a point's texel back through the rectangle's arithmetic, which
+                // rounds its place a few units of the last place off the texel's middle.
+                Assert.Equal(expected, masked[column, row], 1e-4f);
+            }
+        }
+    }
+
+    private sealed class Named(params (string Name, HeightPicture Picture)[] pictures) : ILandscapePictures
+    {
+        public HeightPicture? Heights(string name) => pictures.FirstOrDefault(p => p.Name == name).Picture;
+    }
+
+    [Fact]
     public void A_Masked_Step_Is_Written_And_Read_By_Its_Kind_With_Its_Step()
     {
         var recipe = new Recipe(9, 9, 1f, [new Masked(Rough, "ramp", new(1f, 2f), new(4f, 4f))]);

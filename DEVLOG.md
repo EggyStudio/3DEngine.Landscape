@@ -233,6 +233,8 @@ same at every count, which the tests hold.
 
 Commits that day
 
+- `e053e31` A step can be masked by a picture of weights over a rectangle, so it changes each point
+  by its weight and leaves the ground outside as it stood.
 - `e4894ca` The review holds a handoff of what the module holds, what waits on the owner and what to
   read first, and the tests take the module checks of the latest Tools.
 - `c0ed588` A hole marks the cells within its radius, which no tile draws and no ray meets, for a

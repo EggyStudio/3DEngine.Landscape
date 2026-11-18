@@ -168,6 +168,15 @@ string Mask { get; init; }                               // The picture's name, 
 Vector2 Place { get; init; }                             // The rectangle's middle across the ground, X in X and Z in Y
 Vector2 Size { get; init; }                              // The rectangle's width along X in X and its depth along Z in Y, in meters
 
+class DensityMap                                         // How densely a kind of plant grows over a field, a share from nothing to one at each of the field's points, painted by an engine's editor or taken from a splat map's material
+DensityMap(int columns, int rows, float[] shares);       // A map of shares an engine gives, a point each
+int Columns { get; }                                     // How many points a row has along X
+int Rows { get; }                                        // How many rows of points there are along Z
+IReadOnlyList<float> Shares { get; }                     // The shares, a row at a time, each row along X and the rows along Z
+DensityMap Of(SplatMap splat, int material);             // A map of one material's weights in a splat map, the plant growing where the material lies
+HeightPicture ToPicture();                               // The map as a picture of its shares, a texel a point, which an engine gives a Masked step by a name through ILandscapePictures
+float At(Heightfield field, Vector2 place);              // The density at a place over a field of the map's size, bilinear between its points
+
 record Hole                                              // A hole in the ground, the cells whose middles lie within its radius of its place, which no tile draws and no ray meets, for a cave's or a tunnel's mouth an engine fills with a mesh of its own
 Hole(Vector2 place, float radius);                       // A hole of a radius at a place
 Vector2 Place { get; init; }                             // Its middle across the ground, X in X and Z in Y, about the field's middle
@@ -212,14 +221,6 @@ float SteepBlend { get; }                                // How far in steepness
 float Chance(float height, float steepness);             // The chance from the ranges alone, before the density map's share
 bool Equals(PlacementRule? other);                       // Whether two rules hold the same ranges and blends
 int GetHashCode();                                       // A hash of the ranges and blends, equal for equal rules
-
-class DensityMap                                         // How densely a kind of plant grows over a field, a share from nothing to one at each of the field's points, painted by an engine's editor or taken from a splat map's material
-DensityMap(int columns, int rows, float[] shares);       // A map of shares an engine gives, a point each
-int Columns { get; }                                     // How many points a row has along X
-int Rows { get; }                                        // How many rows of points there are along Z
-IReadOnlyList<float> Shares { get; }                     // The shares, a row at a time, each row along X and the rows along Z
-DensityMap Of(SplatMap splat, int material);             // A map of one material's weights in a splat map, the plant growing where the material lies
-float At(Heightfield field, Vector2 place);              // The density at a place over a field of the map's size, bilinear between its points
 
 record struct Planted                                    // A place kept on the ground, where it stands, the ground's way up there and its seed
 Planted(Vector3 place, Vector3 normal, uint seed);       // A kept place, where it stands, the ground's way up there and its seed

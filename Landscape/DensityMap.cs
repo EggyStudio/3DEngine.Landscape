@@ -61,6 +61,19 @@ public sealed class DensityMap
     }
 
     /// <summary>
+    /// The map as a picture of its shares, a texel a point, which an engine gives a
+    /// <see cref="Masked"/> step by a name through <see cref="ILandscapePictures"/>.
+    /// </summary>
+    /// <remarks>
+    /// A mask over the field's whole rectangle, its middle at the field's and its size the field's
+    /// <see cref="Heightfield.Size"/>, puts the picture's first texel's middle on the field's first
+    /// point and its last on the last, so each point is weighed by its own share. A recipe is data
+    /// and a density map is an engine's, so the engine names the picture and answers for it, a
+    /// map made from the splat map of an earlier build among them.
+    /// </remarks>
+    public HeightPicture ToPicture() => new(Columns, Rows, [.. Shares]);
+
+    /// <summary>
     /// The density at a place over a field of the map's size, bilinear between its points.
     /// </summary>
     /// <param name="field">The field the map is of, which gives where its points lie.</param>

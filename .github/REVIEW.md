@@ -602,3 +602,10 @@ its cell's middle is a half or more, and it is written as JSON by its kind with 
 Three tests hold the weights of nothing, a half and one and the ground outside, the JSON, and the
 refusals. No stroke and no editor; those stay the owner's. The reading is
 `2026-11-18-item-3-masked.webp`. The tests pass, 131.
+
+A density map as a mask in the commit carrying this line, the second hourly step. Its test came
+first and failed for want of the member. `DensityMap.ToPicture` gives the map as a `HeightPicture`,
+a texel a point, which an engine gives a `Masked` step by a name, so a mask over the field's whole
+rectangle weighs each point by its own share, a splat material's weights among them, with no picture
+file. One test holds a masked noise over a cone to the grass's share at every point to a
+ten-thousandth. The tests pass, 132.
