@@ -10,6 +10,8 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 Commits that day
 
+- `04bdef0` A picture stamp and a mask turn their picture by quarter turns within their rectangle,
+  reading it at another place with no sine or cosine, so their bits hold on every system.
 - `f311d11` A tile gives its indices as 16-bit numbers where its corners fit them, shared between
   tiles that share their indices, so an engine draws it at half the index memory.
 

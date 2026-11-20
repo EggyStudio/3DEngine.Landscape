@@ -624,3 +624,8 @@ X, to run along Z at the rectangle's greatest X, by reading the picture at anoth
 sine or cosine, so a recipe of no turn builds its pinned bits as before. Five tests hold a stamp
 turned a quarter and a half equal to the stamps of pictures turned by hand, three turns a half turn
 of a quarter, a mask turned as a stamp is, and the refusals and the JSON. The tests pass, 138.
+
+The repositories' new names in the commit carrying this line. Tools moves to `13ca744` by `pin.py`,
+which named no fact new or changed, the Tools submodule's address is `EggyStudio/3DEngine.Tools`,
+and the README's link row and its submodule command name `EggyStudio/3DEngine.Landscape`, no address
+of a module's old name left outside the review's files. The tests pass, 138.

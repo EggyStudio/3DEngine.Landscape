@@ -1,4 +1,4 @@
-[Devlog](https://github.com/EggyStudio/Landscape/blob/main/DEVLOG.md) [Cheatsheet](https://github.com/EggyStudio/Landscape/blob/main/CHEATSHEET.md)
+[Devlog](https://github.com/EggyStudio/3DEngine.Landscape/blob/main/DEVLOG.md) [Cheatsheet](https://github.com/EggyStudio/3DEngine.Landscape/blob/main/CHEATSHEET.md)
 
 # Landscape
 
@@ -50,7 +50,7 @@ An engine adds the repository as a git submodule under `modules/` and references
 from a project one folder below the engine's root.
 
 ```bash
-git submodule add https://github.com/EggyStudio/Landscape.git modules/Landscape
+git submodule add https://github.com/EggyStudio/3DEngine.Landscape.git modules/Landscape
 ```
 
 ```xml
