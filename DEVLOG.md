@@ -6,6 +6,13 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-20
+
+Commits that day
+
+- `f2c9291` The repository and the Tools submodule are addressed by their new names,
+  3DEngine.Landscape and 3DEngine.Tools, in the link row, the README and the submodule.
+
 ## 2026-11-19
 
 Commits that day
