@@ -6,6 +6,20 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-22
+
+![](.github/assets/readings/2026-11-22-readme-erosion.webp)
+Noise with a dome of 40 m and a cone of 30 m on 193 by 193 points, drawn oblique and lit from one
+side, before hydraulic erosion and after 150,000 droplets, the hills cut into channels and the
+ground roughened.
+
+## 2026-11-21
+
+Commits that day
+
+- `51e4f99` Tools is pinned at be1b6ab, whose gpu.py is the one gate for the GPU lock, and the
+  devlog lists the previous day's commit.
+
 ## 2026-11-20
 
 Commits that day

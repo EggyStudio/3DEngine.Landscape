@@ -2,6 +2,10 @@
 
 # Landscape
 
+![A heightfield of noise and two hills before hydraulic erosion, and after it](.github/assets/readings/2026-11-22-readme-erosion.webp)
+
+A heightfield of noise, a dome and a cone, drawn lit from one side before hydraulic erosion and after 150,000 droplets have cut channels into the hills.
+
 Landscape is a library any engine on .NET takes as a git submodule, for a heightfield whose recipe
 is an ordered list of stamps and procedural operations applied again on each change, erosion among
 them, with vegetation placed through Vegetation by slope, height and a density map, and a splat map
