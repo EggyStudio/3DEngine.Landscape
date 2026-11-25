@@ -14,7 +14,8 @@
 // above with X to the right and Z down the picture, each lit by a sun 33 degrees high from the
 // corner of least X and Z, the top left seen from above, and <recipe>-contours.png, a line each
 // meter of height from above on white, every fifth darker, which shows the shape a single light
-// hides where it falls along a slope.
+// hides where it falls along a slope. The two drawings are made at three samples a pixel each way
+// and averaged, so their edges are smooth.
 using System.IO.Compression;
 using System.Numerics;
 using Landscape;
@@ -159,11 +160,15 @@ Vector3 Tint(Vector3 corner)
     for (var m = 0; m < colors.Length; m++) color += splat.Weight(m, column, row) * colors[m];
     return color;
 }
+// How many samples a pixel of a drawing takes across it, each way, so a silhouette on the white
+// ground is the average of nine and its edge is smooth, never all or nothing (NORM.md, N 4.12).
+const int Samples = 3;
+
 var sun = Vector3.Normalize(new Vector3(-0.6f, 0.55f, -0.6f));
 foreach (var (view, yaw, pitch, wide) in new[] { ("oblique", 45f, 35f, 720), ("above", 0f, 90f, 440) })
 {
     var path = Path.Combine(args[0], $"{args[1]}-{view}.png");
-    WritePng(path, Draw(tiles, Tint, NormalAt, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide));
+    WritePng(path, Smooth(Draw(tiles, Tint, NormalAt, yaw * MathF.PI / 180f, pitch * MathF.PI / 180f, sun, wide * Samples), Samples));
     Console.WriteLine(path);
 }
 
@@ -259,6 +264,34 @@ static (int Width, int Height, byte[] Rgb) Contours(Heightfield field, int width
     return (width, height, rgb);
 }
 
+// A drawing's pixels each the plain average of a square of samples on a side, by averaging in the
+// sRGB bytes the drawing holds, which keeps a white ground white. Rows and columns the square does
+// not fill are left out.
+static (int Width, int Height, byte[] Rgb) Smooth((int Width, int Height, byte[] Rgb) drawing, int samples)
+{
+    var (width, height) = (drawing.Width / samples, drawing.Height / samples);
+    var rgb = new byte[width * height * 3];
+    for (var y = 0; y < height; y++)
+    {
+        for (var x = 0; x < width; x++)
+        {
+            for (var channel = 0; channel < 3; channel++)
+            {
+                var sum = 0;
+                for (var v = 0; v < samples; v++)
+                {
+                    for (var u = 0; u < samples; u++)
+                        sum += drawing.Rgb[((y * samples + v) * drawing.Width + x * samples + u) * 3 + channel];
+                }
+
+                rgb[(y * width + x) * 3 + channel] = (byte)((sum + samples * samples / 2) / (samples * samples));
+            }
+        }
+    }
+
+    return (width, height, rgb);
+}
+
 // The tiles' triangles drawn by a depth buffer in an orthographic view turned about up by the yaw
 // and tipped down by the pitch, each pixel lit by its corners' normals, on white.
 static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> tiles, Func<Vector3, Vector3> tint, Func<Vector3, Vector3?> normalAt, float yaw, float pitch, Vector3 sun, int width)
@@ -268,7 +301,7 @@ static (int Width, int Height, byte[] Rgb) Draw(IReadOnlyList<LandscapeMesh> til
     var all = corners.SelectMany(c => c).ToArray();
     var (left, right) = (all.Min(p => p.X), all.Max(p => p.X));
     var (bottom, top) = (all.Min(p => p.Y), all.Max(p => p.Y));
-    const int margin = 16;
+    const int margin = 16 * Samples;
     var scale = (width - 2 * margin) / (right - left);
     var height = (int)MathF.Ceiling((top - bottom) * scale) + 2 * margin;
     var depth = new float[width * height];
